@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+    <rect width="512" height="512" rx="112" fill="#0F172A"/>
+    <!-- Sumbu Candlestick (Wick) -->
+    <rect x="185" y="100" width="10" height="312" fill="#10B981" rx="5"/>
+    <!-- Body Candlestick (Tiang F) -->
+    <rect x="160" y="160" width="60" height="192" rx="8" fill="#10B981"/>
+    <!-- Garis Atas F -->
+    <path d="M 230 170 H 360 C 371 170 380 179 380 190 V 200 C 380 211 371 220 360 220 H 230 V 170 Z" fill="#F59E0B"/>
+    <!-- Garis Tengah F -->
+    <path d="M 230 260 H 310 C 321 260 330 269 330 280 V 290 C 330 301 321 310 310 310 H 230 V 260 Z" fill="#F59E0B"/>
+</svg>
