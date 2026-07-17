@@ -437,6 +437,7 @@
         .d-input:focus { border-color: var(--accent-primary); background: rgba(14, 165, 233, 0.02); box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.15);}
         .d-delete { position: absolute; top: 20px; right: 20px; z-index: 10; background: rgba(239, 68, 68, 0.9); border: 1px solid rgba(255,255,255,0.2); color: #fff; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; font-size: 18px; display: flex; justify-content: center; align-items: center; box-shadow: 0 10px 20px rgba(239, 68, 68, 0.3); transition: 0.3s;}
         .d-delete:hover { transform: scale(1.1); background: var(--accent-red); }
+.d-delete:hover { transform: scale(1.1); background: var(--accent-red); }
 
         /* --- MOBILE RESPONSIVE FIX (HP) --- */
         @media (max-width: 850px) {
@@ -460,9 +461,208 @@
             .table-container { width: 100%; overflow-x: auto; padding: 0; margin: 0; -webkit-overflow-scrolling: touch; }
             .setup-box { width: 90%; padding: 24px; box-sizing: border-box; }
             #liveClockText { font-size: 13px; }
-        }
-    </style>
+        }/* ========================================================
+           ULTIMATE BUNDLE: SOFT UI + MICRO ANIMATIONS LENGKAP
+           ======================================================== */
 
+        /* --- 1. OVERRIDE VARIABEL (Biar lebih melengkung & soft) --- */
+        :root {
+            --radius-md: 16px; 
+            --radius-lg: 20px;
+            --radius-xl: 24px;
+            --shadow-card: 0 12px 32px -8px rgba(14, 165, 233, 0.12);
+        }
+
+        /* --- 2. BACKGROUND PARTICLES & FLOATING BLOB --- */
+        @keyframes floatBlob {
+            0% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(30px, -40px) scale(1.05); }
+            66% { transform: translate(-20px, 20px) scale(0.95); }
+            100% { transform: translate(0, 0) scale(1); }
+        }
+        body::before {
+            content: ''; position: fixed; top: -10%; left: -10%; width: 50vw; height: 50vh;
+            background: radial-gradient(circle, rgba(14, 165, 233, 0.1) 0%, transparent 60%);
+            border-radius: 50%; filter: blur(60px); z-index: -1; pointer-events: none;
+            animation: floatBlob 15s ease-in-out infinite;
+        }
+        body::after {
+            content: ''; position: fixed; bottom: -10%; right: -10%; width: 60vw; height: 60vh;
+            background: radial-gradient(circle, rgba(56, 189, 248, 0.08) 0%, transparent 60%);
+            border-radius: 50%; filter: blur(80px); z-index: -1; pointer-events: none;
+            animation: floatBlob 20s ease-in-out infinite reverse;
+        }
+
+        /* --- 3. KARTU: GLOW BREATHING, SHADOW, & TOUCH INTERACTION --- */
+        .card, .stat-card, .recap-card {
+            border: 1px solid rgba(14, 165, 233, 0.05);
+            border-top: 1px solid rgba(255, 255, 255, 0.1); /* Glassmorphism highlight */
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-card);
+            position: relative; overflow: hidden;
+            transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease;
+        }
+        .card:active, .stat-card:active { transform: scale(0.98); } /* Efek Sentuh Mengecil */
+
+        /* Gradient & Breathing Khusus Kartu Equity */
+        @keyframes breathingGlow {
+            0% { box-shadow: 0 10px 25px rgba(14, 165, 233, 0.2); transform: translateY(0); }
+            50% { box-shadow: 0 20px 45px rgba(14, 165, 233, 0.4); transform: translateY(-2px); }
+            100% { box-shadow: 0 10px 25px rgba(14, 165, 233, 0.2); transform: translateY(0); }
+        }
+        .stat-card.glow {
+            background: linear-gradient(135deg, #0EA5E9 0%, #38BDF8 100%);
+            color: white;
+            animation: breathingGlow 4s ease-in-out infinite;
+        }
+        .stat-card.glow * { color: white !important; }
+
+        /* --- 4. CARD SHIMMER (Cahaya Lewat) --- */
+        @keyframes shimmerEffect {
+            0% { transform: translateX(-150%) skewX(-45deg); opacity: 0; }
+            50% { opacity: 1; }
+            100% { transform: translateX(200%) skewX(-45deg); opacity: 0; }
+        }
+        .card::before, .stat-card::before {
+            content: ''; position: absolute; top: 0; left: 0; width: 60%; height: 100%;
+            background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.15) 50%, rgba(255,255,255,0) 100%);
+            transform: translateX(-150%) skewX(-45deg);
+            animation: shimmerEffect 4s infinite 2s; pointer-events: none; z-index: 10;
+        }
+        [data-theme="dark"] .card::before { background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.05) 50%, rgba(255,255,255,0) 100%); }
+
+        /* --- 5. BOTTOM NAVIGATION (Ripple & Scale) --- */
+        .nav-item { position: relative; overflow: hidden; transition: all 0.3s ease; }
+        .nav-item.active .nav-icon { transform: scale(1.2) translateY(-2px); filter: drop-shadow(0 4px 6px rgba(14,165,233,0.4)); }
+        .nav-item::after {
+            content: ''; position: absolute; width: 100%; height: 100%; top: 0; left: 0;
+            background: radial-gradient(circle, rgba(14, 165, 233, 0.2) 10%, transparent 10.01%);
+            transform: scale(0); transition: transform 0.5s;
+        }
+        .nav-item:active::after { transform: scale(10); opacity: 0; }
+
+        /* --- 6. FLOATING ILLUSTRATION (Empty State & Ikon) --- */
+        @keyframes floatUpDown {
+            0% { transform: translateY(0px); } 50% { transform: translateY(-8px); } 100% { transform: translateY(0px); }
+        }
+        .float-animation { animation: floatUpDown 3s ease-in-out infinite; }
+
+        /* --- 7. ANIMASI CHART HIDUP (Garis Bergerak) --- */
+        @keyframes dashMove { to { stroke-dashoffset: 0; } }
+        .animated-chart-line {
+            stroke-dasharray: 1000; stroke-dashoffset: 1000;
+            animation: dashMove 3s ease-in-out forwards;
+        }
+
+        /* --- 8. DREAM BOARD PROGRESS BAR ANIMATION --- */
+        .progress-bar-container {
+            width: 100%; height: 12px; background: rgba(14, 165, 233, 0.1);
+            border-radius: 10px; overflow: hidden; position: relative; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .progress-bar-fill {
+            height: 100%; background: linear-gradient(90deg, #0EA5E9, #38BDF8);
+            border-radius: 10px; width: 0%; /* Diatur via JS */
+            transition: width 1.5s cubic-bezier(0.4, 0, 0.2, 1); position: relative;
+        }
+        /* Kilauan di ujung progress bar */
+        .progress-bar-fill::after {
+            content: ''; position: absolute; top: 0; right: 0; bottom: 0; left: 0;
+            background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.4) 50%, rgba(255,255,255,0) 100%);
+            animation: shimmerEffect 2s infinite;
+        }
+
+        /* --- 9. SKELETON LOADING --- */
+        .skeleton { 
+            background: linear-gradient(90deg, var(--bg-card) 25%, rgba(14,165,233,0.05) 50%, var(--bg-card) 75%); 
+            background-size: 200% 100%; 
+            animation: skeleton-loading 1.5s infinite; 
+            border-radius: 8px; 
+        }
+        @keyframes skeleton-loading { 
+            0% { background-position: 200% 0; } 
+            100% { background-position: -200% 0; } 
+        }
+
+        /* --- 10. ANIMASI TITIK-TITIK BERGERAK (Ganti Glitch) --- */
+        @keyframes moveParticles {
+            0% { background-position: 0 0; }
+            100% { background-position: 32px 32px; }
+        }
+        body {
+            animation: moveParticles 3s linear infinite; 
+        }
+        
+        /* Hapus efek glitch */
+        body::before, body::after, .card::before, .stat-card::before {
+            display: none !important;
+        }
+
+        /* --- 11. FIX WARNA BIRU DI TEMA GELAP --- */
+        [data-theme="dark"] .stat-card.glow {
+            background: linear-gradient(135deg, #1E293B 0%, #0F172A 100%) !important;
+            border: 1px solid #334155 !important;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3) !important;
+        }
+        [data-theme="dark"] .stat-card.glow .stat-label { color: #9CA3AF !important; }
+        [data-theme="dark"] .stat-card.glow .stat-value { color: #F3F4F6 !important; }
+        [data-theme="dark"] .stat-card.glow .stat-badge { 
+            background: rgba(255,255,255,0.05) !important; 
+            color: #F3F4F6 !important; 
+            border: 1px solid #3F3F46 !important; 
+        }
+/* ========================================================
+           FIX NEON BORDER (CUMA DI PINGGIR) & SIDEBAR AMBIENT
+           ======================================================== */
+
+        /* 1. Mendaftarkan Variabel Sudut untuk Animasi Berputar (Modern CSS) */
+        @property --angle {
+            syntax: '<angle>';
+            initial-value: 0deg;
+            inherits: false;
+        }
+
+        @keyframes spinAngle {
+            to { --angle: 360deg; }
+        }
+
+        /* 2. Terapkan Masking Neon ke SEMUA Card (Cuma nyala di garis luar) */
+        .card::after, .recap-card::after, .stat-card::after {
+            content: '';
+            position: absolute;
+            inset: -1px; /* Ditarik dikit biar pas nutupin border bawaan */
+            border-radius: inherit; /* Otomatis ngikutin lengkungan card */
+            padding: 2px; /* KETEBALAN GARIS NEON, silakan diubah kalau kurang tebal */
+            
+            /* Gradient warnanya */
+            background: conic-gradient(from var(--angle), transparent 60%, var(--accent-primary) 80%, var(--accent-secondary) 100%);
+            
+            /* JURUS RAHASIA: Memotong bagian tengah gradient, murni nyisain ketebalan padding 2px di atas */
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            
+            animation: spinAngle 4s linear infinite;
+            pointer-events: none; /* Biar tombol di dalam card tetep bisa diklik */
+            z-index: 10;
+        }
+
+        /* 3. Garis Ambient Sidebar (Sesuai coretan lu, diem di pinggir tanpa ngerusak jarak) */
+        .sidebar::after {
+            content: '';
+            position: absolute;
+            top: 0; right: 0; 
+            width: 2px; /* Ketebalan garis sidebar */
+            height: 100%;
+            background: linear-gradient(to bottom, transparent, var(--accent-primary), var(--accent-secondary), transparent);
+            background-size: 100% 200%;
+            animation: neonScroll 3s linear infinite;
+            z-index: 60;
+        }
+        
+        @keyframes neonScroll {
+            0% { background-position: 0 -100%; }
+            100% { background-position: 0 100%; }
+        }
     </style>
     
     <div id="authScreen" style="position: fixed; inset: 0; background: var(--modal-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); z-index: 10000; display: flex; justify-content: center; align-items: center; transition: opacity 0.5s ease;">
@@ -635,7 +835,21 @@
                     </div>
                     <div class="dropdown-menu" id="tabsListDropdown"></div>
                 </div>
-                <button id="themeToggleBtn" class="theme-btn" title="Ganti Tema">🌙</button>
+                <!-- TOMBOL TOGGLE SWITCH BARU -->
+<label style="position: relative; display: inline-block; width: 64px; height: 32px; cursor: pointer; margin-left: 10px;">
+    <!-- Kita tetap pakai ID yang lama biar Javascript lu gak error -->
+    <input type="checkbox" id="themeToggleBtn" style="opacity: 0; width: 0; height: 0;">
+    <span style="position: absolute; inset: 0; background-color: var(--bg-input); border: 1px solid var(--border-color); border-radius: 34px; transition: .4s; display: flex; align-items: center; justify-content: space-between; padding: 0 6px;">
+        <span style="font-size: 14px; z-index: 1;">☀️</span>
+        <span style="font-size: 14px; z-index: 1;">🌙</span>
+        <span id="toggleSliderCircle" style="position: absolute; height: 24px; width: 24px; left: 3px; bottom: 3px; background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 50%; transition: .4s; z-index: 2; box-shadow: 0 2px 5px rgba(0,0,0,0.1);"></span>
+    </span>
+</label>
+
+<!-- TAMBAH KODE INI DI DALAM <style> LU BIAR BISA GESER -->
+<style>
+    #themeToggleBtn:checked ~ span #toggleSliderCircle { transform: translateX(32px); }
+</style>
                 <button class="btn" style="padding: 12px 24px; font-size: 13px; background: rgba(239, 68, 68, 0.1); color: var(--accent-red);" onclick="deleteActiveAccount()">Hapus Data</button>
             </div>
         </header>
@@ -647,22 +861,43 @@
                 
                 <!-- SIMPLE DASHBOARD: HANYA METRIK PENTING -->
                 <div class="grid-3" style="margin-bottom: 24px;">
-                    <div class="card stat-card glow" style="margin-bottom: 0;">
-                        <div class="stat-label">Current Equity</div>
-                        <div class="stat-value font-mono" id="currentBalanceDisplay">0.00</div>
-                        <div class="stat-badge" id="equityDiff">0.00</div>
+                    <!-- Card 1: Current Equity -->
+                    <div class="card stat-card glow" style="margin-bottom: 0; justify-content: center; position: relative; overflow: hidden; padding: 24px;">
+                        <div style="position: relative; z-index: 2;">
+                            <div class="stat-label" style="color: rgba(255,255,255,0.8); margin-bottom: 8px;">CURRENT EQUITY</div>
+                            <div class="stat-value font-mono" id="currentBalanceDisplay" style="color: white; font-size: 32px;">0.00</div>
+                            <div class="stat-badge" id="equityDiff" style="margin-top: 12px; background: rgba(255,255,255,0.2); border: none; color: white;">+0.00% Growth</div>
+                        </div>
+                        <!-- Ilustrasi Chart Naik -->
+                        <svg class="float-animation" style="position: absolute; right: -10px; bottom: 10px; width: 140px; opacity: 0.5; pointer-events: none;" viewBox="0 0 100 50" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M5 45 L30 25 L50 35 L90 5 M80 5 L90 5 L90 15"></path>
+                        </svg>
                     </div>
 
-                    <div class="card stat-card" style="margin-bottom: 0;">
-                        <div class="stat-label">Realized P&L</div>
-                        <div class="stat-value font-mono" id="totalPnlDisplay">0.00</div>
-                        <div class="stat-badge" id="winRateDisplay">Win Rate 0%</div>
+                    <!-- Card 2: Realized P&L -->
+                    <div class="card stat-card" style="margin-bottom: 0; display: flex; flex-direction: row; justify-content: space-between; align-items: center; padding: 24px;">
+                        <div>
+                            <div class="stat-label" style="margin-bottom: 8px;">REALIZED P&L</div>
+                            <div class="stat-value font-mono" id="totalPnlDisplay" style="font-size: 28px;">0.00</div>
+                            <div class="stat-badge" id="winRateDisplay" style="margin-top: 12px;">Win Rate 0%</div>
+                        </div>
+                        <!-- Icon Dompet -->
+                        <div class="float-animation" style="width: 56px; height: 56px; background: rgba(245, 158, 11, 0.1); border-radius: 16px; display: flex; align-items: center; justify-content: center; color: #F59E0B;">
+                            <svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7H5a2 2 0 012-2h14v4"/><path d="M3 5v14a2 2 0 002 2h16v-9H5a2 2 0 00-2 2z"/></svg>
+                        </div>
                     </div>
                     
-                    <div class="card stat-card" style="margin-bottom: 0;">
-                        <div class="stat-label">Total Executions</div>
-                        <div class="stat-value font-mono" id="recapCount">0</div>
-                        <div class="stat-badge" style="color: var(--accent-primary); border-color: var(--accent-primary); background: transparent;">Trades Logged</div>
+                    <!-- Card 3: Total Executions -->
+                    <div class="card stat-card" style="margin-bottom: 0; display: flex; flex-direction: row; justify-content: space-between; align-items: center; padding: 24px;">
+                        <div>
+                            <div class="stat-label" style="margin-bottom: 8px;">TOTAL EXECUTIONS</div>
+                            <div class="stat-value font-mono" id="recapCount" style="font-size: 28px;">0</div>
+                            <div class="stat-badge" style="color: var(--accent-primary); border-color: var(--accent-primary); background: transparent; margin-top: 12px;">Trades Logged</div>
+                        </div>
+                        <!-- Icon Pie Chart -->
+                        <div class="float-animation" style="width: 56px; height: 56px; border-radius: 50%; background: conic-gradient(var(--accent-primary) 0% 75%, var(--bg-input) 75% 100%); position: relative; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
+                            <div style="position: absolute; inset: 12px; background: var(--bg-card); border-radius: 50%;"></div>
+                        </div>
                     </div>
                 </div>
 
@@ -681,30 +916,51 @@
     </div>
 
     <!-- Dream Target (Kanan) -->
-    <div class="card target-card" style="flex-direction: column; align-items: center; justify-content: center; gap: 16px; padding: 24px; margin-bottom: 0 !important; text-align: center; height: 100%; box-sizing: border-box;">
-        <div class="target-image-box" id="targetImgContainer" title="Lihat Foto Target" style="width: 140px; height: 140px; border-radius: 50%; border: 4px dashed var(--border-color); flex-shrink: 0;">
-            <div id="targetImagePlaceholder">
-                <svg width="40" height="40" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+    <div class="card target-card" style="flex-direction: column; align-items: flex-start; justify-content: flex-start; gap: 16px; padding: 24px; margin-bottom: 0 !important; height: 100%; box-sizing: border-box; overflow: hidden; position: relative;">
+        <div style="font-weight: 800; font-size: 16px; margin-bottom: 4px; display: flex; justify-content: space-between; width: 100%; align-items: center;">
+            Dream  Target <span style="color: #F59E0B;">⭐</span>
+        </div>
+        
+        <div class="target-image-box" id="targetImgContainer" title="Lihat/Ganti Foto Target" style="width: 100%; height: 160px; border-radius: 16px; border: 2px dashed var(--border-color); flex-shrink: 0; position: relative; overflow: hidden;">
+            <div id="targetImagePlaceholder" style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; color: var(--text-secondary);">
+                <svg width="32" height="32" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                <span style="font-size: 12px; font-weight: 700;">Upload Foto</span>
             </div>
-            <img id="targetImageDisplay" src="" style="display: none; border-radius: 50%;">
+            <img id="targetImageDisplay" src="" style="display: none; width: 100%; height: 100%; object-fit: cover; border-radius: 14px; position: absolute; inset: 0;">
             <input type="file" id="targetImageInput" accept="image/*" style="display: none;" onchange="handleImageUpload(event)">
         </div>
-        <div class="target-info" style="width: 100%;">
-            <div class="target-header" style="justify-content: center; margin-bottom: 12px;">
-                <span style="color: var(--text-secondary); text-transform: uppercase; letter-spacing: 1px; font-weight: 800; font-size: 14px;">Dream Target</span>
+        
+        <div class="target-info" style="width: 100%; margin-top: 8px;">
+            <div style="display: flex; justify-content: space-between; align-items: end; margin-bottom: 8px;">
+                <span style="color: var(--text-secondary); font-size: 13px; font-weight: 700;">Progress Saat Ini</span>
+                <span id="progressText" class="font-mono float-animation" style="color: var(--accent-primary); font-size: 28px; font-weight: 800; line-height: 1;">0%</span>
             </div>
-            <div class="progress-track" style="height: 16px; margin-bottom: 12px; border-radius: 100px;">
-                <div class="progress-fill" id="progressBar" style="width: 0%; border-radius: 100px;"></div>
+            
+            <div class="progress-track" style="height: 12px; margin-bottom: 20px; border-radius: 100px; background: rgba(14, 165, 233, 0.1);">
+                <div class="progress-fill progress-bar-fill" id="progressBar" style="width: 0%; border-radius: 100px; box-shadow: 0 0 10px rgba(14,165,233,0.5);"></div>
             </div>
-            <span id="progressText" class="font-mono" style="color: var(--accent-primary); font-size: 24px; font-weight: 800;">0%</span>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; background: var(--bg-input); padding: 16px; border-radius: 12px;">
+                <div>
+                    <div style="font-size: 11px; color: var(--text-secondary); font-weight: 700; text-transform: uppercase; margin-bottom: 4px;">Target Dana</div>
+                    <div class="font-mono" style="font-size: 14px; font-weight: 800; color: var(--text-primary);" id="targetAmountDisplay">0.00</div>
+                </div>
+                <div style="text-align: right;">
+                    <div style="font-size: 11px; color: var(--accent-green); font-weight: 700; text-transform: uppercase; margin-bottom: 4px; display: flex; align-items: center; justify-content: flex-end; gap: 4px;">
+                        <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> Terkumpul
+                    </div>
+                    <div class="font-mono" style="font-size: 14px; font-weight: 800; color: var(--accent-green);" id="collectedAmountDisplay">0.00</div>
+                </div>
+            </div>
         </div>
     </div>
-</div>
 
+
+</div>
 <!-- 2. WIDGET CHART (Bawah - Full Lebar & Sangat Besar untuk Analisa) -->
 <div class="card" style="padding: 0; overflow: hidden; margin-bottom: 32px; border-color: var(--accent-primary); display: block;">
     <div class="card-header" style="padding: 20px 24px 12px 24px; margin-bottom: 0;">
-        <div class="card-title" style="color: var(--accent-primary);">Live Chart (XAUUSD) - Pro Analysis</div>
+        <div class="card-title" style="color: var(--accent-primary);">Live Chart </div>
     </div>
     <!-- Fix: Hapus sifat flex, paksa tinggi statis 600px dan display block -->
     <div style="width: 100%; height: 600px; padding: 0 24px 24px 24px; box-sizing: border-box; display: block;">
@@ -755,18 +1011,41 @@
                     </div>
 
                    <div class="grid-3" style="margin-bottom: 20px;">
-                        <div class="recap-card" style="margin-bottom: 0; padding: 20px;">
-                            <div class="stat-label">Profit/Loss</div>
-                            <div id="recapPnL" class="stat-value font-mono">0.00</div>
+                        
+                        <!-- Card 1: Profit/Loss -->
+                        <div class="recap-card" style="margin-bottom: 0; padding: 24px; position: relative;">
+                            <div class="stat-label" style="margin-bottom: 8px; color: var(--text-secondary);">PROFIT/LOSS</div>
+                            <div id="recapPnL" class="stat-value font-mono" style="font-size: 28px;">0.00</div>
+                            <!-- Mini chart decoration -->
+                            <svg style="position: absolute; right: 20px; bottom: 20px; width: 60px; opacity: 0.5; color: var(--accent-green);" viewBox="0 0 100 40" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round">
+                                <path d="M5 35 l20 -15 l20 10 l30 -25 l15 5"></path>
+                                <circle cx="90" cy="10" r="4" fill="currentColor"></circle>
+                            </svg>
                         </div>
-                        <div class="recap-card" style="margin-bottom: 0; padding: 20px;">
-                            <div class="stat-label">Win Rate</div>
-                            <div id="recapWinRate" class="stat-value font-mono">0%</div>
+                        
+                        <!-- Card 2: Win Rate (DENGAN ANIMASI SINKRON) -->
+                        <div class="recap-card" style="margin-bottom: 0; padding: 24px; display: flex; flex-direction: row; justify-content: space-between; align-items: center;">
+                            <div>
+                                <div class="stat-label" style="margin-bottom: 8px; color: var(--text-secondary);">WIN RATE</div>
+                                <div id="recapWinRate" class="stat-value font-mono" style="font-size: 28px;">0%</div>
+                            </div>
+                            <div id="recapWinRateCircle" style="width: 48px; height: 48px; border-radius: 50%; background: conic-gradient(var(--accent-primary) 0% 0%, var(--bg-input) 0% 100%); position: relative; transition: background 0.5s ease;">
+                                <div id="recapWinRateText" style="position: absolute; inset: 8px; background: var(--bg-card); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 800; color: var(--text-secondary);">0%</div>
+                            </div>
                         </div>
-                        <div class="recap-card" style="margin-bottom: 0; padding: 20px;">
-                            <div class="stat-label">Total Trade</div>
-                            <div id="recapTotalTrades" class="stat-value font-mono">0</div>
+                        
+                        <!-- Card 3: Total Trade -->
+                        <div class="recap-card" style="margin-bottom: 0; padding: 24px; display: flex; flex-direction: row; justify-content: space-between; align-items: center;">
+                            <div>
+                                <div class="stat-label" style="margin-bottom: 8px; color: var(--text-secondary);">TOTAL TRADE</div>
+                                <div id="recapTotalTrades" class="stat-value font-mono" style="font-size: 28px;">0</div>
+                            </div>
+                            <!-- Flag Icon -->
+                            <div class="float-animation" style="width: 48px; height: 48px; background: rgba(14, 165, 233, 0.1); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: var(--accent-primary);">
+                                <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"></path><line x1="4" y1="22" x2="4" y2="15"></line></svg>
+                            </div>
                         </div>
+                        
                     </div>
                     <div class="chart-container" style="height: 250px;">
                         <canvas id="recapChart"></canvas>
@@ -1712,15 +1991,24 @@
 
     function updateProgress(currentBalance, cap, target) {
         const progressBar = document.getElementById('progressBar'), progressText = document.getElementById('progressText');
+        const targetAmountDisplay = document.getElementById('targetAmountDisplay');
+        const collectedAmountDisplay = document.getElementById('collectedAmountDisplay');
+        const curr = activeAccountData ? activeAccountData.currency : '$';
+
         if (currentBalance < cap) {
-            progressBar.style.width = '0%'; progressText.innerText = 'Drawdown Area'; progressText.style.color = 'var(--accent-red)';
+            progressBar.style.width = '0%'; progressText.innerText = '0%'; progressText.style.color = 'var(--accent-red)';
+            if(collectedAmountDisplay) collectedAmountDisplay.innerText = formatMoney(0, curr);
         } else {
             const range = target - cap, earned = currentBalance - cap;
-            // Validasi: Jika range 0 (karena modal dan target bernilai sama atau 0), set persentase ke 0 untuk mencegah NaN
             let percentage = (range > 0) ? (earned / range) * 100 : 0; 
             if(percentage > 100) percentage = 100; if(percentage < 0) percentage = 0;
-            progressBar.style.width = `${percentage}%`; progressText.innerText = `${percentage.toFixed(1)}% Completed`; progressText.style.color = 'var(--accent-primary)';
+            
+            progressBar.style.width = `${percentage}%`; 
+            progressText.innerText = `${percentage.toFixed(0)}%`; 
+            progressText.style.color = 'var(--accent-primary)';
+            if(collectedAmountDisplay) collectedAmountDisplay.innerText = formatMoney(earned, curr);
         }
+        if(targetAmountDisplay) targetAmountDisplay.innerText = formatMoney(target - cap, curr);
     }
 
     function renderChart() {
@@ -1738,7 +2026,20 @@
         gradientFill.addColorStop(0, isOverallProfit ? (isDark ? 'rgba(209, 213, 219, 0.2)' : 'rgba(245, 158, 11, 0.2)') : 'rgba(239, 68, 68, 0.2)');
         gradientFill.addColorStop(1, 'rgba(255, 255, 255, 0)');
         equityChartInstance = new Chart(ctx, {
-            type: 'line', data: { labels: labels, datasets: [{ label: `Equity`, data: dataPoints, borderColor: gradientLine, backgroundColor: gradientFill, borderWidth: 4, fill: true, tension: 0.4, pointBackgroundColor: isDark ? '#1A1A1A' : '#FFFFFF', pointBorderColor: isOverallProfit ? colorPrim : '#EF4444', pointBorderWidth: 3, pointRadius: 0, pointHoverRadius: 7 }] },
+            type: 'line', data: { labels: labels, datasets: [{ 
+                label: `Equity`, 
+                data: dataPoints, 
+                borderColor: gradientLine, 
+                backgroundColor: gradientFill, 
+                borderWidth: 4, 
+                fill: true, 
+                
+                tension: 0, /* <--- UBAH INI JADI 0 BIAR GARISNYA TAJAM */
+                
+                pointBackgroundColor: isDark ? '#1A1A1A' : '#FFFFFF', 
+                pointBorderColor: isOverallProfit ? colorPrim : '#EF4444', 
+                pointBorderWidth: 3, pointRadius: 0, pointHoverRadius: 7 
+            }] },
             options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false, backgroundColor: isDark ? '#1A1A1A' : '#FFFFFF', titleColor: isDark ? '#F3F4F6' : '#0F172A', bodyColor: isDark ? '#9CA3AF' : '#64748B', titleFont: {family: 'Plus Jakarta Sans', size: 14}, bodyFont: {family: 'JetBrains Mono', size: 14}, padding: 16, cornerRadius: 12, borderColor: isDark ? '#27272A' : '#E2E8F0', borderWidth: 1 } }, scales: { x: { grid: { display: false }, ticks: { display: false } }, y: { border: { display: false }, grid: { color: isDark ? '#27272A' : '#E2E8F0', borderDash: [5, 5] }, ticks: { color: isDark ? '#9CA3AF' : '#64748B', font: {family: 'JetBrains Mono', size: 11}, padding: 16 } } }, interaction: { mode: 'nearest', axis: 'x', intersect: false } }
         });
     }
@@ -1918,7 +2219,23 @@
     function renderApp() {
         journalTable.innerHTML = ''; let totalPnL = 0, winCount = 0;
         const curr = activeAccountData.currency, cap = activeAccountData.capital, target = activeAccountData.target;
-        if (trades.length === 0) { journalTable.innerHTML = `<tr style="animation: none;"><td colspan="10" style="text-align:center; color:var(--text-secondary); padding:60px; background: transparent !important; transform: none !important;">Belum ada history trading bro. Gas OP!</td></tr>`; }
+       if (trades.length === 0) { 
+            journalTable.innerHTML = `
+            <tr style="pointer-events: none; border: none;">
+                <td colspan="10" style="text-align:center; padding:80px 20px; background: transparent !important; border: none;">
+                    <div class="float-animation" style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                        <div style="width: 80px; height: 80px; background: rgba(14, 165, 233, 0.05); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 16px;">
+                            <svg class="animated-chart-line" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                                <path d="M3 15h4l3-6 4 4 4-8"/>
+                            </svg>
+                        </div>
+                        <h4 style="font-size: 16px; font-weight: 800; color: var(--text-primary); margin-bottom: 4px;">Belum ada data tersedia</h4>
+                        <p style="font-size: 13px; color: var(--text-secondary); margin: 0;">Mulai trading untuk melihat chart & insight.</p>
+                    </div>
+                </td>
+            </tr>`; 
+        }
 
         [...trades].reverse().forEach((trade, reversedIndex) => {
             const actualIndex = trades.length - 1 - reversedIndex;
@@ -1945,14 +2262,25 @@
             journalTable.appendChild(tr);
         });
 
-        const currentBalance = cap + totalPnL; document.getElementById('currentBalanceDisplay').innerText = formatMoney(currentBalance, curr);
+        const currentBalance = cap + totalPnL; 
+        animateValue(document.getElementById('currentBalanceDisplay'), cap, currentBalance, 1500);
         const diffEl = document.getElementById('equityDiff');
         
-        // Validasi: Cegah NaN dengan memastikan cap (modal) lebih dari 0
-        let growthPercent = cap > 0 ? ((totalPnL/cap)*100).toFixed(2) : "0.00";
-
-        if(totalPnL >= 0) { diffEl.innerText = `+${growthPercent}% Growth`; diffEl.style.color = 'var(--text-primary)'; } 
-        else { diffEl.innerText = `${growthPercent}% Drawdown`; diffEl.style.color = 'var(--text-primary)'; }
+        // --- FIX GROWTH PERSENTASE (Handle Modal Awal 0) ---
+        if (cap > 0) {
+            let growthPercent = ((totalPnL/cap)*100).toFixed(2);
+            if(totalPnL >= 0) { diffEl.innerText = `+${growthPercent}% Growth`; diffEl.style.color = 'var(--text-primary)'; } 
+            else { diffEl.innerText = `${growthPercent}% Drawdown`; diffEl.style.color = 'var(--text-primary)'; }
+        } else {
+            // Kalau modal awal $0 (Challenge dari nol)
+            if (totalPnL > 0) {
+                diffEl.innerText = `Pure Profit 🚀`; diffEl.style.color = 'var(--text-primary)';
+            } else if (totalPnL < 0) {
+                diffEl.innerText = `Minus (No Capital)`; diffEl.style.color = 'var(--accent-red)';
+            } else {
+                diffEl.innerText = `0.00% Growth`; diffEl.style.color = 'var(--text-primary)';
+            }
+        }
         
         const totalClass = totalPnL >= 0 ? 'text-profit' : 'text-loss', totalText = totalPnL >= 0 ? `+${formatMoney(totalPnL, curr)}` : `-${formatMoney(Math.abs(totalPnL), curr)}`;
         document.getElementById('totalPnlDisplay').innerHTML = `<span class="${totalClass}">${totalText}</span>`;
@@ -1960,9 +2288,27 @@
         const winRate = trades.length > 0 ? ((winCount / trades.length) * 100).toFixed(1) : 0;
         document.getElementById('winRateDisplay').innerText = `Win Rate ${winRate}%`;
 
-        updateProgress(currentBalance, cap, target); renderChart(); setTimeout(renderCalendar, 100); 
-        updateRecap('all', document.querySelector('.btn-filter.active')); checkTargetCompletion(currentBalance, cap, target, curr);
-        if (document.getElementById('tab-assets').classList.contains('active')) renderDreams();
+        updateProgress(currentBalance, cap, target); 
+        renderChart(); 
+        setTimeout(renderCalendar, 100); 
+        
+        // --- FIX RECAP CHART AUTO UPDATE ---
+        applyRecapFilter(); 
+        // -----------------------------------
+
+        checkTargetCompletion(currentBalance, cap, target, curr);
+        if (document.getElementById('tab-assets').classList.contains('active')) {
+            renderDreams();
+        }
+        
+        setTimeout(() => {
+            const dreamFill = document.querySelector('.progress-fill');
+            if (dreamFill) {
+                const currentWidth = dreamFill.style.width;
+                dreamFill.style.width = '0%';
+                setTimeout(() => { dreamFill.style.width = currentWidth; }, 100);
+            }
+        }, 500);
     }
 
     let tempSetupImgStr = '';
@@ -2143,6 +2489,15 @@ function renderRecapStats(data) {
     
     const wrEl = document.getElementById('recapWinRate');
     if(wrEl) wrEl.innerText = winRate.toFixed(1) + '%';
+
+    // --- KODE BARU BUAT BIKIN LINGKARAN BERGERAK SESUAI WIN RATE ---
+    const circleEl = document.getElementById('recapWinRateCircle');
+    const circleText = document.getElementById('recapWinRateText');
+    if(circleEl && circleText) {
+        circleEl.style.background = `conic-gradient(var(--accent-primary) 0% ${winRate}%, var(--bg-input) ${winRate}% 100%)`;
+        circleText.innerText = Math.round(winRate) + '%';
+    }
+    // -------------------------------------------------------------
     
     const trEl = document.getElementById('recapTotalTrades');
     if(trEl) trEl.innerText = data.length;
@@ -2215,6 +2570,73 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+/* ========================================================
+           JAVASCRIPT ANIMASI: ANGKA BERLARI & PROGRESS BAR
+           ======================================================== */
+
+        // 1. ANIMASI ANGKA COUNTER (Format Rupiah)
+        function animateValue(obj, start, end, duration) {
+            if (!obj) return;
+            let startTimestamp = null;
+            const step = (timestamp) => {
+                if (!startTimestamp) startTimestamp = timestamp;
+                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                // Fungsi easing ringan biar berhentinya mulus
+                const easeOutQuart = 1 - Math.pow(1 - progress, 4); 
+                const currentVal = Math.floor(easeOutQuart * (end - start) + start);
+                
+                // Cek apakah elemen butuh format Rupiah atau cuma angka biasa
+                if(obj.innerHTML.includes("Rp") || end > 1000) {
+                    obj.innerHTML = "Rp " + currentVal.toLocaleString('id-ID');
+                } else {
+                    obj.innerHTML = currentVal.toLocaleString('id-ID'); // Untuk Total Trade/Win Rate
+                }
+                
+                if (progress < 1) window.requestAnimationFrame(step);
+            };
+            window.requestAnimationFrame(step);
+        }
+
+        // 2. ANIMASI PROGRESS BAR DREAM BOARD
+        // Panggil fungsi ini pas lu nge-load data Dream Board lu
+        function animateDreamBoard(currentAmount, targetAmount, fillElementId, textElementId) {
+            const fillElement = document.getElementById(fillElementId);
+            const textElement = document.getElementById(textElementId);
+            if(!fillElement) return;
+
+            let percentage = (currentAmount / targetAmount) * 100;
+            if (percentage > 100) percentage = 100; // Mentok 100%
+
+            // Animasi lebar bar jalan
+            setTimeout(() => { fillElement.style.width = percentage + "%"; }, 300);
+
+            // Animasi angka persen berjalan
+            if(textElement) {
+                animateValue(textElement, 0, Math.floor(percentage), 1500);
+            }
+        }
+
+        // 3. UPDATE EMPTY STATE TABEL LAMA LU
+        // Cari: if (trades.length === 0) { ... } di fungsi renderApp() lu dan timpa dengan ini:
+        /*
+        if (trades.length === 0) { 
+            journalTable.innerHTML = `
+            <tr style="pointer-events: none; border: none;">
+                <td colspan="10" style="text-align:center; padding:80px 20px; background: transparent !important; border: none;">
+                    <div class="float-animation" style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                        <div style="width: 80px; height: 80px; background: rgba(14, 165, 233, 0.05); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 16px;">
+                            <svg class="animated-chart-line" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                                <path d="M3 15h4l3-6 4 4 4-8"/>
+                            </svg>
+                        </div>
+                        <h4 style="font-size: 16px; font-weight: 800; color: var(--text-primary); margin-bottom: 4px;">Belum ada data tersedia</h4>
+                        <p style="font-size: 13px; color: var(--text-secondary); margin: 0;">Mulai trading untuk melihat chart & insight.</p>
+                    </div>
+                </td>
+            </tr>`; 
+        }
+        */
 </script>
 
 </body>
