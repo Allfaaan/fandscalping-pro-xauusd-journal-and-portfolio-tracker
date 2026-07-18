@@ -454,6 +454,32 @@
             .nav-item.active { background: var(--bg-input); }
             .main-wrapper { margin-left: 0 !important; margin-bottom: 75px; width: 100%; max-width: 100vw; }
             .topbar { padding: 15px !important; height: auto; flex-direction: column; gap: 15px; }
+
+/* PAKSA UKURAN SWITCH BIAR GAK GEPENG DI HP */
+    .topbar-actions label {
+        flex-shrink: 0 !important; 
+        width: 50px !important;
+        height: 26px !important;
+        margin-left: 0 !important;
+    }
+    
+    /* SESUAIKAN UKURAN BUNDARAN SWITCH NYA */
+    #toggleSliderCircle {
+        width: 18px !important;
+        height: 18px !important;
+        left: 3px !important;
+        bottom: 3px !important;
+    }
+    
+    /* SESUAIKAN JARAK GESER PAS DIKLIK */
+    #themeToggleBtn:checked ~ span #toggleSliderCircle {
+        transform: translateX(24px) !important;
+    }
+    
+    /* KECILIN ICON MATAHARI/BULANNYA DIKIT */
+    .topbar-actions label span:not(#toggleSliderCircle) {
+        font-size: 11px !important;
+    }
             .search-wrapper { width: 100% !important; }
             .topbar-actions { justify-content: space-between; width: 100%; gap: 10px; }
             .content { padding: 20px 15px !important; width: 100%; box-sizing: border-box; overflow-x: hidden; }
@@ -2077,26 +2103,149 @@
         if (currentBalance >= target && cap > 0) {
             const congratsKey = 'fs_congrats_hit_' + activeAccountId;
             if (!localStorage.getItem(congratsKey)) {
-                let startDate = trades.length > 0 ? trades[0].date.split('T')[0] : '-', endDate = trades.length > 0 ? trades[trades.length - 1].date.split('T')[0] : '-';
+                let startDate = trades.length > 0 ? trades[0].date.split('T')[0] : '-';
+                let endDate = trades.length > 0 ? trades[trades.length - 1].date.split('T')[0] : '-';
                 let returnPct = (((currentBalance - cap) / cap) * 100).toFixed(2);
-                let userName = localStorage.getItem('fs_user_name') || 'Trader', accName = activeAccountData ? activeAccountData.name : 'Tantangan';
-                const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-                const themeBg = isDark ? '#2D2D2D' : '#FFFFFF', themeTextPrimary = isDark ? '#FFFFFF' : '#0F172A', themeTextSecondary = isDark ? '#A3A3A3' : '#64748B', themeBoxBg = isDark ? '#1A1A1A' : '#F8FAFC', themeBoxBorder = isDark ? '#404040' : '#E2E8F0';
                 
-                // AMBIL FOTO TARGET DARI LOCAL STORAGE
-                let savedTargetImg = localStorage.getItem('fs_target_img_' + activeAccountId);
-                let targetIconHTML = savedTargetImg 
-                    ? `<img src="${savedTargetImg}" style="width: 80px; height: 80px; object-fit: cover; border-radius: 50%; border: 3px solid #0EA5E9; margin: 0 auto 12px auto; display: block; box-shadow: 0 8px 16px rgba(0,0,0,0.15);">` 
-                    : `<div style="font-size: 56px; margin-bottom: 12px; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));">🏆</div>`;
+                let formattedPct = parseFloat(returnPct).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                
+                let userName = localStorage.getItem('fs_user_name') || 'Trader';
+                let accName = activeAccountData ? activeAccountData.name : 'Tantangan';
+
+                // --- SISTEM DETEKSI TEMA (DARK/LIGHT) ---
+                const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+                
+                // Variabel warna dinamis yang bakal berubah otomatis sesuai tema
+                const bgMain = isDark ? '#0B0E14' : '#FFFFFF';
+                const textPrimary = isDark ? '#FFFFFF' : '#0F172A';
+                const textSecondary = isDark ? '#9CA3AF' : '#64748B';
+                const boxBg = isDark ? 'rgba(0, 0, 0, 0.6)' : 'rgba(240, 249, 255, 0.6)';
+                const gridBg = isDark ? 'rgba(255,255,255,0.03)' : '#F8FAFC';
+                const gridBorder = isDark ? 'rgba(255,255,255,0.05)' : '#E2E8F0';
+                const quotesBg = isDark ? 'rgba(0,0,0,0.3)' : 'rgba(14, 165, 233, 0.05)';
+                const shadowTrophy = isDark ? 'rgba(0,0,0,0.8)' : 'rgba(212,175,55,0.4)';
 
                 Swal.fire({
-                    background: themeBg, width: '400px', padding: '0', showConfirmButton: false, customClass: { popup: 'swal-no-scroll' },
-                    html: `<div id="captureArea" style="background: ${themeBg}; padding: 40px 30px 20px 30px; width: 100%; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; font-family: 'Plus Jakarta Sans', sans-serif;"><div style="text-align: center; width: 100%;">${targetIconHTML}<h2 style="font-size: 24px; font-weight: 800; margin: 0; color: ${themeTextPrimary}; text-transform: uppercase; letter-spacing: -0.5px;">SELAMAT ${userName}!</h2><p style="font-size: 14px; margin-bottom: 25px; color: ${themeTextSecondary}; font-weight: 700;">Tantangan "${accName}" Tuntas!</p><h1 style="color: #10B981; font-size: 46px; font-weight: 800; margin: 0; font-family: 'JetBrains Mono', monospace; letter-spacing: -2px; word-break: break-word; line-height: 1.1;">+${returnPct}%</h1><p style="font-size: 16px; font-weight: 800; margin: 8px 0 25px 0; color: ${themeTextPrimary};">Equity Tembus ${formatMoney(target, curr)}!</p><div style="display: flex; justify-content: space-between; padding: 16px 20px; background: ${themeBoxBg}; border-radius: 16px; width: 100%; border: 1px solid ${themeBoxBorder}; box-sizing: border-box;"><div style="text-align: left;"><span style="font-size: 10px; font-weight: 800; color: ${themeTextSecondary}; text-transform: uppercase; letter-spacing: 0.5px;">Mulai</span><br><strong style="font-size: 14px; font-family: 'JetBrains Mono', monospace; color: ${themeTextPrimary};">${startDate}</strong></div><div style="text-align: right;"><span style="font-size: 10px; font-weight: 800; color: ${themeTextSecondary}; text-transform: uppercase; letter-spacing: 0.5px;">Selesai</span><br><strong style="font-size: 14px; color: #0EA5E9; font-family: 'JetBrains Mono', monospace;">${endDate}</strong></div></div></div><div style="margin-top: 28px; display: flex; align-items: center; justify-content: center; gap: 8px; opacity: 0.7; width: 100%;"><div style="width: 20px; height: 20px; background: linear-gradient(135deg, #0EA5E9, #38BDF8); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 800; color: #000;">F</div><span style="font-size: 12px; font-weight: 700; letter-spacing: 0.5px; color: ${themeTextPrimary};">by Fandscalping</span></div></div><div style="padding: 0 30px 30px 30px; background: ${themeBg}; width: 100%; box-sizing: border-box; border-radius: 0 0 24px 24px;"><button id="btnDownloadStory" style="width: 100%; background: linear-gradient(135deg, #0EA5E9, #38BDF8); color: #000; border: none; padding: 18px; border-radius: 100px; font-weight: 800; font-size: 15px; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; font-family: 'Plus Jakarta Sans', sans-serif; box-shadow: 0 10px 25px -10px rgba(14, 165, 233, 0.5); transition: 0.2s;">DOWNLOAD JADI STORY</button></div>`,
+                    background: 'transparent',
+                    width: '450px',
+                    padding: '0',
+                    showConfirmButton: false,
+                    customClass: { popup: 'swal-no-scroll' },
+                    didOpen: (popup) => {
+                        popup.style.setProperty('background', 'transparent', 'important');
+                        popup.style.setProperty('border', 'none', 'important');
+                        popup.style.setProperty('box-shadow', 'none', 'important');
+                    },
+                    html: `
+                    <!-- KOTAK UTAMA -->
+                    <div id="captureArea" style="background: ${bgMain}; border: 2px solid #D4AF37; border-radius: 20px; box-shadow: 0 0 30px rgba(212, 175, 55, 0.2), inset 0 0 20px rgba(212, 175, 55, 0.15); padding: 30px 20px 25px 20px; width: 100%; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; font-family: 'Plus Jakarta Sans', sans-serif; position: relative; overflow: hidden;">
+
+                        <!-- Cahaya Ambient Emas -->
+                        <div style="position: absolute; top: -50px; left: 50%; transform: translateX(-50%); width: 250px; height: 250px; background: radial-gradient(circle, rgba(212,175,55,0.25) 0%, transparent 70%); z-index: 0;"></div>
+
+                        <!-- Ikon Piala & Logo F (FIXED ALIGNMENT) -->
+                        <div style="position: relative; z-index: 1; margin-bottom: 12px; display: inline-block;">
+                            <div style="font-size: 85px; line-height: 1; filter: drop-shadow(0 10px 15px ${shadowTrophy}); text-align: center;">🏆</div>
+                            <!-- Logo F dipaku presisi di tengah piala pakai left & top 50% -->
+                            <div style="position: absolute; top: 32%; left: 50%; transform: translate(-50%, -50%); font-size: 26px; font-weight: 900; color: #FFF; text-shadow: 0 2px 4px rgba(0,0,0,0.9), 0 0 10px rgba(212,175,55,1); font-style: italic;">F</div>
+                        </div>
+
+                        <!-- Judul Selamat -->
+                        <h2 style="font-size: 28px; font-weight: 900; margin: 0 0 4px 0; color: ${textPrimary}; text-transform: uppercase; letter-spacing: 1px; z-index: 1;">SELAMAT ${userName.toUpperCase()}!</h2>
+                        <p style="font-size: 14px; margin: 0 0 20px 0; color: ${textSecondary}; z-index: 1; font-weight: 600;">✦ Tantangan "<span style="color:#D4AF37; font-weight: 800;">${accName}</span>" Tuntas! ✦</p>
+
+                        <!-- Box Persentase -->
+                        <div style="background: ${boxBg}; border: 1px solid rgba(212, 175, 55, 0.3); border-radius: 16px; padding: 15px; width: 100%; box-sizing: border-box; text-align: center; margin-bottom: 20px; z-index: 1; box-shadow: inset 0 0 20px rgba(16, 185, 129, 0.1);">
+                            <h1 style="color: #10B981; font-size: 42px; font-weight: 900; margin: 0; font-family: 'JetBrains Mono', monospace; text-shadow: 0 0 15px rgba(16, 185, 129, 0.3); display: flex; align-items: center; justify-content: center; gap: 8px;">
+                                +${formattedPct}%
+                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17l9.2-9.2M17 17V7H7"/></svg>
+                            </h1>
+                            <p style="font-size: 14px; font-weight: 700; margin: 5px 0 0 0; color: ${textPrimary};">Equity Tembus <span style="color: #D4AF37;">${formatMoney(target, curr)}</span>!</p>
+                        </div>
+
+                        <!-- Grid Info -->
+                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 5px; width: 100%; margin-bottom: 20px; z-index: 1; background: ${gridBg}; padding: 12px 8px; border-radius: 12px; border: 1px solid ${gridBorder};">
+                            
+                            <!-- Kiri -->
+                            <div style="text-align: center; border-right: 1px solid ${gridBorder}; display: flex; flex-direction: column; justify-content: center;">
+                                <div style="font-size: 9px; color: ${textSecondary}; font-weight: 800; letter-spacing: 1px; margin-bottom: 6px;">MULAI</div>
+                                <div style="display: flex; align-items: center; justify-content: center; gap: 6px; color: #D4AF37; margin-bottom: 4px;">
+                                    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                                    <span style="font-size: 11px; font-family: 'JetBrains Mono', monospace; font-weight: 800;">${startDate}</span>
+                                </div>
+                                <div style="font-size: 9px; color: ${textSecondary};">Equity ${formatMoney(cap, curr)}</div>
+                            </div>
+                            
+                            <!-- Tengah -->
+                            <div style="text-align: center; display: flex; flex-direction: column; justify-content: center;">
+                                <div style="font-size: 18px; color: #10B981; margin-bottom: 2px;">🎯</div>
+                                <div style="font-size: 8px; color: ${textSecondary}; font-weight: 800; letter-spacing: 1px;">PROFITABILITY</div>
+                                <div style="font-size: 10px; color: #10B981; font-weight: 900; letter-spacing: 1px; margin: 2px 0;">LEGENDARY</div>
+                                <div style="color: #D4AF37; font-size: 11px; letter-spacing: 1px;">★★★★★</div>
+                            </div>
+                            
+                            <!-- Kanan -->
+                            <div style="text-align: center; border-left: 1px solid ${gridBorder}; display: flex; flex-direction: column; justify-content: center;">
+                                <div style="font-size: 9px; color: ${textSecondary}; font-weight: 800; letter-spacing: 1px; margin-bottom: 6px;">SELESAI</div>
+                                <div style="display: flex; align-items: center; justify-content: center; gap: 6px; color: #10B981; margin-bottom: 4px;">
+                                    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                                    <span style="font-size: 11px; font-family: 'JetBrains Mono', monospace; font-weight: 800;">${endDate}</span>
+                                </div>
+                                <div style="font-size: 9px; color: ${textSecondary};">Equity ${formatMoney(currentBalance, curr)}</div>
+                            </div>
+                        </div>
+
+                        <!-- Quotes -->
+                        <div style="border-top: 1px dashed rgba(212, 175, 55, 0.3); border-bottom: 1px dashed rgba(212, 175, 55, 0.3); padding: 12px 0; width: 100%; text-align: center; margin-bottom: 22px; z-index: 1; background: ${quotesBg};">
+                            <p style="margin: 0; font-size: 13px; font-weight: 600; font-style: italic; color: ${textPrimary};">"Disiplin Hari Ini, Kebebasan Esok Hari."</p>
+                            <p style="margin: 4px 0 0 0; font-size: 10px; color: #D4AF37; font-weight: 800;">- Fandscalping</p>
+                        </div>
+
+                        <!-- Tombol Emas -->
+                        <div style="width: 100%; z-index: 1;">
+                            <button id="btnDownloadStory" style="width: 100%; background: linear-gradient(90deg, #B8860B 0%, #FFD700 50%, #B8860B 100%); background-size: 200% auto; color: #000; border: 2px solid #FFF; padding: 16px; border-radius: 12px; font-weight: 900; font-size: 15px; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; font-family: 'Plus Jakarta Sans', sans-serif; box-shadow: 0 0 20px rgba(212, 175, 55, 0.5); display: flex; align-items: center; justify-content: center; gap: 10px; transition: 0.3s;">
+                                DOWNLOAD JADI STORY
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                            </button>
+                        </div>
+
+                        <!-- Footer Info -->
+                        <div style="display: flex; justify-content: space-between; width: 100%; margin-top: 24px; padding-top: 15px; border-top: 1px solid ${gridBorder}; z-index: 1;">
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <div style="color: #D4AF37; font-size: 16px;">🎯</div>
+                                <div style="text-align: left;">
+                                    <div style="font-size: 10px; font-weight: 800; color: ${textPrimary}; letter-spacing: 0.5px;">DISIPLIN</div>
+                                    <div style="font-size: 8px; color: ${textSecondary};">Kunci Konsistensi</div>
+                                </div>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <div style="color: #D4AF37; font-size: 16px;">📈</div>
+                                <div style="text-align: left;">
+                                    <div style="font-size: 10px; font-weight: 800; color: ${textPrimary}; letter-spacing: 0.5px;">KONSISTEN</div>
+                                    <div style="font-size: 8px; color: ${textSecondary};">Bangun Kebiasaan</div>
+                                </div>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <div style="color: #10B981; font-size: 16px;">💲</div>
+                                <div style="text-align: left;">
+                                    <div style="font-size: 10px; font-weight: 800; color: ${textPrimary}; letter-spacing: 0.5px;">PROFIT</div>
+                                    <div style="font-size: 8px; color: ${textSecondary};">Nikmati Hasilnya</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    `,
                     didRender: () => {
                         const swalContainer = document.querySelector('.swal2-container'); if(swalContainer) swalContainer.style.overflow = 'hidden';
-                        document.getElementById('btnDownloadStory').addEventListener('click', () => {
-                            html2canvas(document.getElementById('captureArea'), { backgroundColor: themeBg, scale: 2 }).then(canvas => {
-                                const link = document.createElement('a'); link.download = 'Target_Tercapai_' + accName.replace(/[^a-zA-Z0-9]/g, '_') + '.png'; link.href = canvas.toDataURL('image/png'); link.click();
+                        
+                        const btn = document.getElementById('btnDownloadStory');
+                        btn.addEventListener('mouseover', () => btn.style.transform = 'scale(1.02)');
+                        btn.addEventListener('mouseout', () => btn.style.transform = 'scale(1)');
+
+                        btn.addEventListener('click', () => {
+                            // Background untuk hasil download sekarang otomatis ngikutin tema
+                            html2canvas(document.getElementById('captureArea'), { backgroundColor: bgMain, scale: 3 }).then(canvas => {
+                                const link = document.createElement('a'); link.download = 'Legendary_Hit_' + accName.replace(/[^a-zA-Z0-9]/g, '_') + '.png'; link.href = canvas.toDataURL('image/png'); link.click();
                             });
                         });
                     }
@@ -2637,6 +2786,104 @@ document.addEventListener('DOMContentLoaded', () => {
             </tr>`; 
         }
         */
+// ==========================================
+    // FITUR PENCARIAN GLOBAL (ULTRA DEEP SEARCH)
+    // ==========================================
+    document.addEventListener('DOMContentLoaded', () => {
+        const searchInput = document.querySelector('.search-bar');
+        const searchWrapper = document.querySelector('.search-wrapper');
+        
+        // 1. Buat Box Hasil Pencarian secara dinamis
+        const resultsBox = document.createElement('div');
+        resultsBox.id = 'smartSearchResults';
+        resultsBox.style.cssText = 'position: absolute; top: 100%; left: 0; right: 0; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; margin-top: 8px; max-height: 300px; overflow-y: auto; z-index: 9999; display: none; box-shadow: 0 10px 25px rgba(0,0,0,0.1); padding: 8px;';
+        searchWrapper.appendChild(resultsBox);
+
+        // 2. Database Kata Kunci & Lokasinya di Aplikasi
+        const searchIndex = [
+            { keywords: ['kalkulator', 'lot', 'hitung lot', 'calculator'], title: 'Kalkulator Lot Size', tab: 'tab-journal', scrollId: 'calcModal' },
+            { keywords: ['checklist', 'trading checklist', 'harian'], title: 'Trading Checklist Harian', tab: 'tab-dashboard', scrollId: 'checklistContainer' },
+            { keywords: ['dream', 'target', 'aset', 'impian'], title: 'Target Aset / Dream Board', tab: 'tab-assets', scrollId: 'dreamTabsContainer' },
+            { keywords: ['review', 'evaluasi', 'mingguan', 'bulanan', 'kesalahan', 'jurnal review'], title: 'Jurnal Review (Evaluasi)', tab: 'tab-review', scrollId: 'revWeek' },
+            { keywords: ['news', 'kalender', 'berita'], title: 'Live News Calendar', tab: 'tab-portfolio', scrollId: 'tv_news_widget' },
+            { keywords: ['dashboard', 'home', 'equity', 'growth'], title: 'Dashboard Utama', tab: 'tab-dashboard', scrollId: 'currentBalanceDisplay' },
+            { keywords: ['quick entry', 'entry', 'jurnal baru'], title: 'Quick Entry Log', tab: 'tab-journal', scrollId: 'asset' },
+            { keywords: ['edukasi', 'modul', 'belajar', 'snr', 'snd', 'market structure'], title: 'Modul Edukasi Trading', tab: 'tab-education', scrollId: 'tab-education' }
+        ];
+
+        // 3. Logika pas lu ngetik di kolom search
+        searchInput.addEventListener('input', (e) => {
+            const query = e.target.value.toLowerCase().trim();
+            resultsBox.innerHTML = '';
+            
+            if (query === '') {
+                resultsBox.style.display = 'none';
+                return;
+            }
+
+            let found = false;
+
+            // Cari di Database Menu/Fitur
+            searchIndex.forEach(item => {
+                if (item.keywords.some(kw => kw.includes(query)) || item.title.toLowerCase().includes(query)) {
+                    addResult(item.title, 'Menu/Fitur', item.tab, item.scrollId);
+                    found = true;
+                }
+            });
+
+            // Cari di History Trading Log (Berdasarkan Pair atau Catatan)
+            const historyTrades = JSON.parse(localStorage.getItem('fs_jour_v14_' + activeAccountId)) || [];
+            historyTrades.forEach(t => {
+                if (t.asset.toLowerCase().includes(query) || (t.notes && t.notes.toLowerCase().includes(query))) {
+                    addResult(`Log Trade: ${t.asset} (${t.position})`, 'Riwayat Jurnal', 'tab-portfolio', 'journalTable');
+                    found = true;
+                }
+            });
+
+            if (!found) {
+                resultsBox.innerHTML = '<div style="padding: 10px; color: var(--text-secondary); font-size: 13px; text-align: center;">Pencarian tidak ditemukan...</div>';
+            }
+            resultsBox.style.display = 'block';
+        });
+
+        // 4. Logika pas hasil pencariannya di-klik
+        function addResult(title, type, tabId, elementId) {
+            const div = document.createElement('div');
+            div.style.cssText = 'padding: 10px; border-bottom: 1px solid var(--border-color); cursor: pointer; border-radius: 6px; display: flex; flex-direction: column; gap: 4px; transition: 0.2s;';
+            div.onmouseover = () => div.style.background = 'var(--bg-input)';
+            div.onmouseout = () => div.style.background = 'transparent';
+            
+            div.innerHTML = `<span style="font-size: 10px; color: var(--accent-primary); font-weight: 800; text-transform: uppercase;">${type}</span><span style="font-size: 13px; color: var(--text-primary); font-weight: 700;">${title}</span>`;
+            
+            div.onclick = () => {
+                // A. Trigger pindah tab otomatis
+                const tabElement = document.querySelector(`.nav-item[onclick*="${tabId}"]`);
+                if(tabElement) switchTab(tabId, tabElement);
+                
+                // B. Scroll langsung ke fiturnya & kasih efek kedip
+                setTimeout(() => {
+                    const el = document.getElementById(elementId);
+                    if (el) {
+                        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        el.style.transition = '0.3s';
+                        el.style.boxShadow = '0 0 20px var(--accent-primary)'; // Efek Kedip
+                        setTimeout(() => el.style.boxShadow = 'none', 1500);
+                        if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') el.focus();
+                    }
+                }, 300);
+                
+                // Tutup box pencarian
+                resultsBox.style.display = 'none';
+                searchInput.value = '';
+            };
+            resultsBox.appendChild(div);
+        }
+
+        // Tutup pencarian kalau klik di luar kotak
+        window.addEventListener('click', (e) => {
+            if (!e.target.closest('.search-wrapper')) resultsBox.style.display = 'none';
+        });
+    });
 </script>
 
 </body>
