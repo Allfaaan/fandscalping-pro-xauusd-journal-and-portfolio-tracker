@@ -853,6 +853,9 @@
                     <div class="pulse-dot"></div>
                     <span id="liveClockText">00:00:00</span>
                 </div>
+<button class="btn" style="padding: 10px 16px; background: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-primary); display: flex; align-items: center; gap: 8px; font-size: 13px; text-transform: none; border-radius: 100px; box-shadow: 0 4px 10px rgba(0,0,0,0.02); margin-left: 10px; margin-right: 10px;" onclick="document.getElementById('nativeMusicWidget').style.display='block'">
+                    <span style="font-size: 16px;">🎵</span> <span style="font-weight: 700;">Lagu</span>
+                </button>
 
                 <div class="custom-dropdown">
                     <div class="dropdown-selected" onclick="toggleDropdown()">
@@ -2886,5 +2889,76 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 </script>
 
+<!-- ========================================== -->
+<!-- WIDGET MUSIC: SPOTIFY PLAYLIST PERMANEN    -->
+<!-- ========================================== -->
+<div id="nativeMusicWidget" class="card" style="display: none; position: fixed; bottom: 24px; right: 24px; width: 340px; z-index: 99999; padding: 20px; border-color: var(--accent-green); box-shadow: 0 15px 40px rgba(0,0,0,0.3); transition: 0.3s;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <h3 style="font-size: 14px; font-weight: 800; color: var(--accent-green); display: flex; align-items: center; gap: 8px;">
+            <span class="pulse-dot" style="animation: none; background-color: var(--accent-green);"></span> Trading Radio
+        </h3>
+        <!-- Tombol Kontrol: Minimize & Close -->
+        <div style="display: flex; gap: 4px; align-items: center;">
+            <button onclick="toggleMinimizeMusic()" id="minimizeMusicBtn" style="background: transparent; border: none; color: var(--text-secondary); cursor: pointer; font-size: 16px; font-weight: bold; padding: 0 6px;" title="Minimize">_</button>
+            <button onclick="document.getElementById('nativeMusicWidget').style.display='none'; stopSpotify();" style="background: transparent; border: none; color: var(--text-secondary); cursor: pointer; font-size: 18px; font-weight: bold; padding: 0 5px;" title="Tutup">&times;</button>
+        </div>
+    </div>
+    
+    <!-- Bagian isi yang bisa disembunyikan waktu di-minimize -->
+    <div id="musicContentBody">
+        <p style="font-size: 11px; color: var(--text-secondary); margin-bottom: 12px; font-weight: 600;">One-click playlist, tinggal play:</p>
+        
+        <!-- Tombol Utama (Playlist Racikan Lu) -->
+        <div style="display: grid; grid-template-columns: 1fr; gap: 8px; margin-bottom: 8px;">
+            <button onclick="playSpotify('0UfGDF0PZXdbqP2uzaIEB5')" class="btn" style="padding: 12px; font-size: 13px; background: rgba(16, 185, 129, 0.15); border: 2px solid var(--accent-green); color: var(--accent-green); text-transform: none; font-weight: 800; display: flex; justify-content: center; align-items: center; gap: 8px; transition: 0.3s;">
+                🎧 Main Playlist (Custom)
+            </button>
+        </div>
+
+        <!-- Tombol Alternatif Buat Selingan -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 16px;">
+            <button onclick="playSpotify('37i9dQZF1DWWQRwui0ExPn')" class="btn" style="padding: 8px; font-size: 11px; background: transparent; border: 1px solid var(--border-color); color: var(--text-secondary); text-transform: none; font-weight: 700;">☕ Chill Lofi</button>
+            <button onclick="playSpotify('37i9dQZF1DXdLEN7aqioXI')" class="btn" style="padding: 8px; font-size: 11px; background: transparent; border: 1px solid var(--border-color); color: var(--text-secondary); text-transform: none; font-weight: 700;">⚡ Cyberpunk</button>
+        </div>
+        
+        <!-- Area Spotify Player -->
+        <div id="spotifyBox" style="width: 100%; height: 152px; background: var(--bg-input); border-radius: 12px; overflow: hidden; display: none; border: none;">
+            <iframe id="spotifyIframe" src="" width="100%" height="152" frameborder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy" style="border-radius: 12px;"></iframe>
+        </div>
+    </div>
+</div>
+
+<script>
+    function playSpotify(playlistId) {
+        const iframe = document.getElementById('spotifyIframe');
+        iframe.src = 'https://open.spotify.com/embed/playlist/' + playlistId + '?utm_source=generator&theme=0';
+        document.getElementById('spotifyBox').style.display = 'block';
+    }
+
+    function stopSpotify() {
+        document.getElementById('spotifyIframe').src = '';
+        document.getElementById('spotifyBox').style.display = 'none';
+        // Reset minimize state juga kalau ditutup total
+        document.getElementById('musicContentBody').style.display = 'block';
+        document.getElementById('minimizeMusicBtn').innerText = '_';
+    }
+
+    function toggleMinimizeMusic() {
+        const body = document.getElementById('musicContentBody');
+        const btn = document.getElementById('minimizeMusicBtn');
+        const widget = document.getElementById('nativeMusicWidget');
+        
+        if (body.style.display === 'none') {
+            body.style.display = 'block';
+            btn.innerText = '_';
+            widget.style.padding = '20px';
+        } else {
+            body.style.display = 'none';
+            btn.innerText = '+';
+            widget.style.padding = '12px 20px';
+        }
+    }
+</script>
+<!-- ========================================== -->
 </body>
 </html>
