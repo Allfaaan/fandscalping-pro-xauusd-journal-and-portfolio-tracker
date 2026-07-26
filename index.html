@@ -1964,11 +1964,40 @@
         }
     }
 
+    // --- FUNGSI FORMAT UANG & KONVERSI USD OTOMATIS (REAL-TIME KURS) ---
+    window.isStandardUSDMode = false; // Status tombol mata
+    
     function formatMoney(amount, symbol) {
-        const amt = amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-        if (symbol === 'Rp') return 'Rp ' + amount.toLocaleString('id-ID', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
-        if (symbol && symbol.trim() === 'USC') return 'USC ' + amt; // <--- INI TAMBAHAN BUAT USC
-        return symbol + amt;
+        let displayAmount = amount;
+        let displaySymbol = symbol ? symbol.trim() : '$';
+        
+        // 1. Ambil kurs REAL-TIME langsung dari API yang udah disave sistem
+        const liveKurs = parseFloat(localStorage.getItem('fs_kurs_live'));
+        
+        // 2. Prioritaskan kurs live, kalau API down baru pakai kurs cadangan dari akun
+        let currentKurs = !isNaN(liveKurs) ? liveKurs : (activeAccountData ? activeAccountData.kurs : 16300);
+
+        // 3. LOGIKA MANIPULASI PSIKOLOGI (Ubah ke USD Standar)
+        if (window.isStandardUSDMode) {
+            displaySymbol = '$';
+            if (symbol && symbol.trim() === 'USC') {
+                displayAmount = amount / 100; // USC ke USD selalu bagi 100
+            } else if (symbol && symbol.trim() === 'Rp') {
+                displayAmount = amount / currentKurs; // Rupiah ke USD pakai KURS REAL-TIME
+            }
+        }
+
+        // 4. Hasil akhir render angka
+        const amt = displayAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        
+        if (displaySymbol === 'Rp') {
+            return 'Rp ' + displayAmount.toLocaleString('id-ID', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+        }
+        if (displaySymbol === 'USC') {
+            return 'USC ' + amt;
+        }
+        
+        return displaySymbol + amt;
     }
 
     currencySelect.addEventListener('change', function(e) {
@@ -2472,7 +2501,7 @@
         });
 
         const currentBalance = cap + totalPnL; 
-        animateValue(document.getElementById('currentBalanceDisplay'), cap, currentBalance, 1500);
+        animateValue(document.getElementById('currentBalanceDisplay'), cap, currentBalance, 1500, curr);
         const diffEl = document.getElementById('equityDiff');
         
         // --- FIX GROWTH PERSENTASE (Handle Modal Awal 0) ---
@@ -2783,8 +2812,8 @@ document.addEventListener('DOMContentLoaded', () => {
            JAVASCRIPT ANIMASI: ANGKA BERLARI & PROGRESS BAR
            ======================================================== */
 
-        // 1. ANIMASI ANGKA COUNTER (Format Rupiah)
-        function animateValue(obj, start, end, duration) {
+        // 1. ANIMASI ANGKA COUNTER (Support Mode USD & Real Kurs)
+        function animateValue(obj, start, end, duration, symbol = '') {
             if (!obj) return;
             let startTimestamp = null;
             const step = (timestamp) => {
@@ -2792,16 +2821,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 const progress = Math.min((timestamp - startTimestamp) / duration, 1);
                 // Fungsi easing ringan biar berhentinya mulus
                 const easeOutQuart = 1 - Math.pow(1 - progress, 4); 
-                const currentVal = Math.floor(easeOutQuart * (end - start) + start);
+                const currentVal = (easeOutQuart * (end - start) + start);
                 
-                // Cek apakah elemen butuh format Rupiah atau cuma angka biasa
-                if(obj.innerHTML.includes("Rp") || end > 1000) {
-                    obj.innerHTML = "Rp " + currentVal.toLocaleString('id-ID');
+                // Cek apakah elemen butuh format mata uang atau cuma angka biasa (kayak Total Trade)
+                if (symbol) {
+                    obj.innerHTML = formatMoney(currentVal, symbol);
                 } else {
-                    obj.innerHTML = currentVal.toLocaleString('id-ID'); // Untuk Total Trade/Win Rate
+                    obj.innerHTML = Math.floor(currentVal).toLocaleString('id-ID'); 
                 }
                 
-                if (progress < 1) window.requestAnimationFrame(step);
+                if (progress < 1) {
+                    window.requestAnimationFrame(step);
+                } else {
+                    // Pastikan angka akhir presisi pas animasi selesai
+                    if(symbol) obj.innerHTML = formatMoney(end, symbol);
+                }
             };
             window.requestAnimationFrame(step);
         }
@@ -3056,26 +3090,23 @@ document.addEventListener('DOMContentLoaded', () => {
     setInterval(updateMarketSession, 60000);
     updateMarketSession();
 
-    // 2. CENT MODE TOGGLE
-    let isCentMode = false;
+    // 2. CENT MODE TOGGLE (Standard USD View)
     function toggleCentMode() {
-        isCentMode = !isCentMode;
-        document.getElementById('centToggleBtn').innerText = isCentMode ? '🙈' : '👁️';
-        document.getElementById('centToggleBtn').style.borderColor = isCentMode ? 'var(--accent-primary)' : 'var(--border-color)';
+        window.isStandardUSDMode = !window.isStandardUSDMode;
+        
+        const btn = document.getElementById('centToggleBtn');
+        btn.innerText = window.isStandardUSDMode ? '🙈' : '👁️';
+        btn.style.borderColor = window.isStandardUSDMode ? 'var(--accent-primary)' : 'var(--border-color)';
+        btn.style.color = window.isStandardUSDMode ? 'var(--accent-primary)' : 'var(--text-primary)';
         
         if (typeof Toast !== 'undefined') {
-            Toast.fire({ icon: 'info', title: isCentMode ? 'Cent Mode: Tampil sebagai Standard' : 'Tampilan Asli' });
+            Toast.fire({ 
+                icon: 'info', 
+                title: window.isStandardUSDMode ? 'Mode USD: Tampil sebagai Dollar Standar' : 'Tampilan Mata Uang Asli' 
+            });
         }
         
-        // Override formatMoney function sementara
-        const originalFormatMoney = window.formatMoney;
-        window.formatMoney = function(amount, symbol) {
-            const displayAmount = isCentMode ? (amount / 100) : amount;
-            const amt = displayAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-            if (symbol === 'Rp') return 'Rp ' + displayAmount.toLocaleString('id-ID', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
-            return symbol + amt;
-        };
-        renderApp(); // Reload tampilan angka
+        renderApp(); // Otomatis ngereload seluruh angka di dashboard
     }
 
     // 3. COMPOUNDING CALCULATOR
