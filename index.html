@@ -951,7 +951,36 @@
                     </div>
                 </div>
 
-               <!-- 1. GRID ATAS (Equity & Dream Target - Setengah-setengah / 50:50) -->
+               <!-- FITUR 1: ACCOUNT FLIPPER TRACKER & CUSTOM PNL -->
+                <div class="card" style="margin-bottom: 24px; background: linear-gradient(135deg, rgba(14,165,233,0.05), rgba(56,189,248,0.05)); border-color: var(--accent-secondary);">
+                    <div class="card-header" style="margin-bottom: 16px;">
+                        <div class="card-title" style="color: var(--accent-primary);">🔥 Extreme Flipper Tracker</div>
+                        
+                        <!-- Tombol Buat Upload Editan Foto Lu -->
+                        <button class="btn" onclick="document.getElementById('pnlBgInput').click()" style="padding: 8px 16px; font-size: 12px; background: rgba(245, 158, 11, 0.1); color: #F59E0B; border: 1px solid rgba(245, 158, 11, 0.2);">
+                            🎨 Set Custom PnL Background
+                        </button>
+                        <input type="file" id="pnlBgInput" accept="image/*" style="display:none" onchange="handlePnlBg(event)">
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; align-items: center;">
+                        <div>
+                            <div style="font-size: 11px; color: var(--text-secondary); font-weight: 800; text-transform: uppercase;">Target Hari Ini</div>
+                            <div class="font-mono" id="flipperTodayTarget" style="font-size: 28px; font-weight: 900; color: var(--text-primary);">Set Plan Dulu!</div>
+                        </div>
+                        <div>
+                            <div style="font-size: 11px; color: var(--text-secondary); font-weight: 800; text-transform: uppercase;">Status Misi</div>
+                            <div id="flipperStatus" style="font-size: 16px; font-weight: 800; color: var(--accent-secondary); margin-top: 4px;">Menunggu Sinkronisasi...</div>
+                        </div>
+                        <div>
+                            <div style="font-size: 11px; color: var(--text-secondary); font-weight: 800; text-transform: uppercase; margin-bottom: 8px;">Progress Timeline</div>
+                            <div class="progress-track" style="height: 10px; border-radius: 10px;">
+                                <div id="flipperTimeBar" class="progress-fill" style="width: 0%; background: var(--accent-secondary);"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+<!-- 1. GRID ATAS (Equity & Dream Target - Setengah-setengah / 50:50) -->
 <div class="grid-2" style="margin-bottom: 24px;">
     <!-- Chart Equity (Kiri) -->
     <div class="card" style="margin-bottom: 0;">
@@ -3109,7 +3138,7 @@ document.addEventListener('DOMContentLoaded', () => {
         renderApp(); // Otomatis ngereload seluruh angka di dashboard
     }
 
-    // 3. COMPOUNDING CALCULATOR
+    // 3. COMPOUNDING CALCULATOR + AUTO-SYNC QUICK ENTRY
     function generateCompounding() {
         const modal = parseFloat(document.getElementById('compModal').value);
         const target = parseFloat(document.getElementById('compTarget').value) / 100;
@@ -3118,6 +3147,12 @@ document.addEventListener('DOMContentLoaded', () => {
         let html = '';
         let current = modal;
         
+        // Simpan plan ke memori buat Flipper Tracker
+        localStorage.setItem('fs_flip_modal_' + activeAccountId, modal);
+        localStorage.setItem('fs_flip_target_' + activeAccountId, target);
+        localStorage.setItem('fs_flip_days_' + activeAccountId, days);
+        localStorage.setItem('fs_flip_start_' + activeAccountId, new Date().toISOString());
+        
         for(let i = 1; i <= days; i++) {
             let reqProfit = current * target;
             current += reqProfit;
@@ -3125,30 +3160,74 @@ document.addEventListener('DOMContentLoaded', () => {
                 <td style="padding: 10px;">Hari ${i}</td>
                 <td class="font-mono text-profit" style="padding: 10px;">${current.toLocaleString('en-US', {maximumFractionDigits:2})}</td>
                 <td class="font-mono text-primary" style="padding: 10px;">+${reqProfit.toLocaleString('en-US', {maximumFractionDigits:2})}</td>
+                <td style="padding: 10px;">
+                    <button onclick="syncToQuickEntry(${reqProfit})" style="background: var(--accent-primary); color: #fff; border: none; padding: 4px 12px; border-radius: 4px; font-size: 10px; font-weight: 800; cursor: pointer;">
+                        ⚡ SYNC
+                    </button>
+                </td>
             </tr>`;
         }
         
         document.getElementById('compTableBody').innerHTML = html;
         document.getElementById('compResultArea').style.display = 'block';
+        updateFlipperTracker(); // Panggil tracker
     }
 
-    // 4. SHARE PNL ALA BINANCE
+    // Fungsi Jembatan: Auto Hitung Lot XAUUSD dari Target Profit (Asumsi SL 20 pips)
+    function syncToQuickEntry(reqProfit) {
+        // Asumsi XAUUSD standard: 1 Lot gerak 10 Pips (1 poin) = $10. 
+        // Kalau risk/SL lu 20 Pips, kita cari butuh lot berapa buat dapet reqProfit.
+        const asumsiPips = 20; 
+        let calcLot = reqProfit / asumsiPips; // Buat Cent Account otomatis ngikut karena reqProfitnya udah di-scale
+        
+        document.getElementById('qty').value = calcLot.toFixed(2);
+        
+        // Pindah tab otomatis ke Quick Entry kalau belum di sana
+        const tabQE = document.querySelector('.nav-item[onclick*="tab-journal"]');
+        if(tabQE) switchTab('tab-journal', tabQE);
+        
+        Toast.fire({ icon: 'success', title: `Target Profit & Lot ${calcLot.toFixed(2)} di-Sync!` });
+    }
+
+// LOGIKA UPLOAD CUSTOM PNL BACKGROUND
+    function handlePnlBg(event) {
+        const file = event.target.files[0];
+        if(file) {
+            const reader = new FileReader();
+            reader.onload = e => {
+                localStorage.setItem('fs_custom_pnl_bg', e.target.result);
+                Toast.fire({icon:'success', title:'Karya Visual Lu Berhasil Di-set!'});
+            }
+            reader.readAsDataURL(file);
+        }
+    }
+
+    // ROMBAK ULANG SHARE PNL ALA BINANCE (CUSTOM BACKGROUND)
     function sharePnL(index) {
         const trade = trades[index];
         const isProfit = trade.pnl >= 0;
         const pnlColor = isProfit ? '#10B981' : '#EF4444';
-        const pnlBg = isProfit ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)';
+        const pnlBg = isProfit ? 'rgba(16, 185, 129, 0.15)' : 'rgba(239, 68, 68, 0.15)';
         const pnlSign = isProfit ? '+' : '';
         const roi = (((trade.exit - trade.entry) / trade.entry) * 100 * (trade.position === 'LONG' ? 1 : -1) * (trade.qty * 100)).toFixed(2);
-        
-        // Tarik nama kalau ada, kalau nggak pakai default
         const trName = localStorage.getItem('fs_user_name') || 'M Alfandha Fitrian H';
+        
+        // Ambil editan gambar lu, kalau kosong pakai warna solid gelap
+        const customBg = localStorage.getItem('fs_custom_pnl_bg');
+        const bgStyle = customBg 
+            ? `background-image: url('${customBg}'); background-size: cover; background-position: center;` 
+            : `background: #0B0E14;`;
 
         Swal.fire({
             background: 'transparent', width: '400px', showConfirmButton: false,
             html: `
-            <div id="pnlCardToShare" style="background: #0B0E14; border-radius: 16px; padding: 24px; font-family: 'Plus Jakarta Sans', sans-serif; position: relative; overflow: hidden; border: 1px solid #27272A; text-align: left;">
-                <div style="position: absolute; top: -50px; right: -50px; width: 150px; height: 150px; background: ${pnlBg}; border-radius: 50%; filter: blur(40px);"></div>
+            <div id="pnlCardToShare" style="${bgStyle} border-radius: 16px; padding: 24px; font-family: 'Plus Jakarta Sans', sans-serif; position: relative; overflow: hidden; border: 1px solid #27272A; text-align: left; z-index: 1;">
+                
+                <!-- Overlay Gelap Biar Teks Tetep Kebaca -->
+                <div style="position: absolute; inset: 0; background: rgba(11, 14, 20, 0.85); z-index: -1;"></div>
+                
+                <!-- Cahaya Gradient Sesuai Profit/Loss -->
+                <div style="position: absolute; top: -50px; right: -50px; width: 150px; height: 150px; background: ${pnlBg}; border-radius: 50%; filter: blur(40px); z-index: -1;"></div>
                 
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                     <div style="color: #FFF; font-weight: 900; font-size: 18px; font-style: italic;">FANDSCALPING</div>
@@ -3160,11 +3239,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     <span style="color: #FFF; font-weight: 800; font-size: 16px;">${trade.asset}</span>
                 </div>
 
-                <div style="font-family: 'JetBrains Mono', monospace; font-size: 48px; font-weight: 900; color: ${pnlColor}; line-height: 1; margin-bottom: 20px;">
+                <div style="font-family: 'JetBrains Mono', monospace; font-size: 48px; font-weight: 900; color: ${pnlColor}; line-height: 1; margin-bottom: 20px; text-shadow: 0 4px 15px rgba(0,0,0,0.5);">
                     ${pnlSign}${roi}%
                 </div>
 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; border-top: 1px solid #27272A; padding-top: 16px;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 16px;">
                     <div>
                         <div style="color: #9CA3AF; font-size: 10px; font-weight: 700; margin-bottom: 4px;">ENTRY PRICE</div>
                         <div style="color: #FFF; font-family: 'JetBrains Mono', monospace; font-size: 14px; font-weight: 800;">${trade.entry}</div>
@@ -3175,7 +3254,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                 </div>
 
-                <div style="display: flex; align-items: center; gap: 12px; background: rgba(255,255,255,0.05); padding: 12px; border-radius: 8px;">
+                <div style="display: flex; align-items: center; gap: 12px; background: rgba(255,255,255,0.1); padding: 12px; border-radius: 8px; backdrop-filter: blur(5px);">
                     <div style="width: 32px; height: 32px; background: linear-gradient(135deg, #0EA5E9, #38BDF8); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; color: #FFF; font-size: 12px;">${trName.substring(0,2).toUpperCase()}</div>
                     <div>
                         <div style="color: #FFF; font-size: 12px; font-weight: 800;">${trName}</div>
@@ -3183,13 +3262,17 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                 </div>
             </div>
-            <button id="dlPnlBtn" style="width:100%; margin-top:16px; padding:12px; background:#0EA5E9; color:#fff; border:none; border-radius:8px; font-weight:800; cursor:pointer;">DOWNLOAD GAMBAR</button>
+            <button id="dlPnlBtn" style="width:100%; margin-top:16px; padding:12px; background:#0EA5E9; color:#fff; border:none; border-radius:8px; font-weight:800; cursor:pointer; box-shadow: 0 4px 15px rgba(14,165,233,0.3);">DOWNLOAD GAMBAR</button>
             `,
             didRender: () => {
                 document.getElementById('dlPnlBtn').addEventListener('click', () => {
-                    html2canvas(document.getElementById('pnlCardToShare'), { backgroundColor: '#0B0E14', scale: 3 }).then(canvas => {
+                    html2canvas(document.getElementById('pnlCardToShare'), { 
+                        backgroundColor: null, // Biar background asli canvas nyesuaiin gambar 
+                        scale: 3, 
+                        useCORS: true // Buat handle gambar external kalau ada
+                    }).then(canvas => {
                         const link = document.createElement('a'); 
-                        link.download = `PnL_${trade.asset}_${trade.date.split('T')[0]}.png`; 
+                        link.download = `PnL_Custom_${trade.asset}_${trade.date.split('T')[0]}.png`; 
                         link.href = canvas.toDataURL('image/png'); 
                         link.click();
                     });
@@ -3198,7 +3281,55 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 5. INJECT WIN-RATE HEATMAP KE TAB PORTFOLIO
+    // UPDATE FLIPPER TRACKER METERAN
+    function updateFlipperTracker() {
+        const modalStr = localStorage.getItem('fs_flip_modal_' + activeAccountId);
+        const daysStr = localStorage.getItem('fs_flip_days_' + activeAccountId);
+        const startStr = localStorage.getItem('fs_flip_start_' + activeAccountId);
+        const tgtStr = localStorage.getItem('fs_flip_target_' + activeAccountId);
+        
+        const elTarget = document.getElementById('flipperTodayTarget');
+        const elStatus = document.getElementById('flipperStatus');
+        const elBar = document.getElementById('flipperTimeBar');
+        
+        if(!modalStr || !daysStr || !startStr || !elTarget) return;
+
+        const start = new Date(startStr);
+        const now = new Date();
+        const diffTime = Math.abs(now - start);
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); // Hari ke-berapa sekarang
+        
+        const totalDays = parseInt(daysStr);
+        const currentDay = diffDays > totalDays ? totalDays : diffDays;
+        
+        // Kalkulasi target kumulatif hari ini
+        let targetHariIni = parseFloat(modalStr);
+        const pctTarget = parseFloat(tgtStr);
+        for(let i=1; i<=currentDay; i++) {
+            targetHariIni += (targetHariIni * pctTarget);
+        }
+
+        // Cek current equity
+        let totalPnL = trades.reduce((sum, t) => sum + t.pnl, 0);
+        let currEquity = activeAccountData ? activeAccountData.capital + totalPnL : 0;
+
+        // Render UI
+        const currName = activeAccountData ? activeAccountData.currency : '$';
+        elTarget.innerText = formatMoney(targetHariIni, currName);
+        
+        if (currEquity >= targetHariIni) {
+            elStatus.innerText = `ON TRACK (Hari ${currentDay}/${totalDays}) 🔥`;
+            elStatus.style.color = 'var(--accent-green)';
+        } else {
+            elStatus.innerText = `BEHIND TARGET (Hari ${currentDay}/${totalDays}) ⚠️`;
+            elStatus.style.color = 'var(--accent-red)';
+        }
+
+        const barPct = (currentDay / totalDays) * 100;
+        elBar.style.width = `${barPct}%`;
+    }
+
+   // 5. INJECT WIN-RATE HEATMAP KE TAB PORTFOLIO
     document.addEventListener('DOMContentLoaded', () => {
         const recapContainer = document.querySelector('.portfolio-recap');
         if(!recapContainer) return;
