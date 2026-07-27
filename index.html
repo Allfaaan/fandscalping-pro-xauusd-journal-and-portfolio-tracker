@@ -861,14 +861,17 @@
             </div>
             
             <div class="topbar-actions">
-                <!-- TOMBOL PROFIL KHUSUS HP -->
-<button class="btn" style="padding: 8px 12px; font-size: 16px; background: transparent; border: 1px solid var(--border-color); border-radius: 100px; box-shadow: 0 4px 10px rgba(0,0,0,0.02);" onclick="editProfile()" title="Edit Nama">
-    👤
-</button>
-<button class="btn" style="padding: 8px 12px; font-size: 16px; background: transparent; border: 1px solid var(--border-color); border-radius: 100px; box-shadow: 0 4px 10px rgba(0,0,0,0.02);" onclick="document.getElementById('profileImageInput').click()" title="Ganti Foto">
-    📸
-</button>
-                
+                    <!-- WIDGET PROFIL KHUSUS HP (Ada Foto & Namanya) -->
+    <div style="display: flex; align-items: center; gap: 10px; background: var(--bg-card); border: 1px solid var(--border-color); padding: 6px 14px; border-radius: 100px; box-shadow: 0 4px 10px rgba(0,0,0,0.02); cursor: pointer;" onclick="editProfile()" title="Klik nama untuk edit">
+        <!-- Lingkaran Foto -->
+        <div style="width: 28px; height: 28px; border-radius: 50%; background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800; color: #FFF; overflow: hidden; position: relative;" onclick="event.stopPropagation(); document.getElementById('profileImageInput').click();" title="Klik foto untuk ganti">
+            <span id="hpAvatarInitials">NP</span>
+            <img id="hpAvatarImg" src="" style="display: none; width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0;">
+        </div>
+        <!-- Teks Nama -->
+        <span id="hpUserName" style="font-size: 13px; font-weight: 800; color: var(--text-primary); white-space: nowrap; max-width: 90px; overflow: hidden; text-overflow: ellipsis;">Nama Pengguna</span>
+    </div>
+
 <!-- 1. MARKET SESSION INDICATOR -->
     <div id="marketSessionWidget" class="live-clock-widget" style="font-size: 11px; padding: 6px 12px; gap: 6px; border-color: var(--accent-primary);" title="Sesi Market Aktif">
         <span id="sessionDot" class="pulse-dot" style="width: 6px; height: 6px;"></span>
@@ -1993,17 +1996,37 @@
         });
     }
 
-    function loadProfileData() {
+        function loadProfileData() {
         const savedName = localStorage.getItem('fs_user_name') || 'Nama Pengguna';
         const savedTier = localStorage.getItem('fs_user_tier') || 'Klik buat isi profil';
         const savedAvatar = localStorage.getItem('fs_user_avatar');
-        document.getElementById('displayUserName').innerText = savedName; document.getElementById('displayUserTier').innerText = savedTier;
+        
+        // 1. Update profil yang di sidebar (Buat tampilan PC/Laptop)
+        document.getElementById('displayUserName').innerText = savedName; 
+        document.getElementById('displayUserTier').innerText = savedTier;
+        
+        // 2. Update profil khusus yang di Topbar (Buat tampilan HP)
+        const hpUserName = document.getElementById('hpUserName');
+        if (hpUserName) hpUserName.innerText = savedName;
+
+        // 3. Bikin Singkatan Inisial Nama
         const words = savedName.trim().split(' ');
         const initials = words.length > 1 ? (words[0][0] + words[1][0]).toUpperCase() : words[0].substring(0,2).toUpperCase();
+        
+        // 4. Update Foto Sidebar (PC)
         document.getElementById('avatarInitials').innerText = initials;
         const imgEl = document.getElementById('avatarImg'), initEl = document.getElementById('avatarInitials');
         if(savedAvatar) { imgEl.src = savedAvatar; imgEl.style.display = 'block'; initEl.style.display = 'none'; } 
         else { imgEl.style.display = 'none'; initEl.style.display = 'block'; }
+        
+        // 5. Update Foto Topbar (HP)
+        const hpInitEl = document.getElementById('hpAvatarInitials');
+        const hpImgEl = document.getElementById('hpAvatarImg');
+        if (hpInitEl && hpImgEl) {
+            hpInitEl.innerText = initials;
+            if(savedAvatar) { hpImgEl.src = savedAvatar; hpImgEl.style.display = 'block'; hpInitEl.style.display = 'none'; } 
+            else { hpImgEl.style.display = 'none'; hpInitEl.style.display = 'block'; }
+        }
     }
 
     function handleProfileImage(event) {
