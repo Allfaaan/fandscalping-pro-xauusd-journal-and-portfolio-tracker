@@ -2060,7 +2060,7 @@
                   '<input id="swal-input2" class="swal2-input" placeholder="Status (ex: Pro Scalper)" value="' + currentTier + '">',
             focusConfirm: false, showCancelButton: true, confirmButtonText: 'Simpan', cancelButtonText: 'Batal',
             confirmButtonColor: '#0EA5E9', background: 'var(--bg-card)', color: 'var(--text-primary)', customClass: { popup: 'font-mono' },
-            preConfirm: () => { return [ document.getElementById('swal-input1').value, document.getElementById('swal-input2'].value ] }
+            preConfirm: () => { return [ document.getElementById('swal-input1').value, document.getElementById('swal-input2').value ] }
         });    
 
         if (formValues) {
