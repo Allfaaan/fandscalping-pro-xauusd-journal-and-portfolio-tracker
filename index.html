@@ -861,15 +861,19 @@
             </div>
             
             <div class="topbar-actions">
-                    <!-- WIDGET PROFIL KHUSUS HP (Ada Foto & Namanya) -->
-    <div style="display: flex; align-items: center; gap: 10px; background: var(--bg-card); border: 1px solid var(--border-color); padding: 6px 14px; border-radius: 100px; box-shadow: 0 4px 10px rgba(0,0,0,0.02); cursor: pointer;" onclick="editProfile()" title="Klik nama untuk edit">
-        <!-- Lingkaran Foto -->
-        <div style="width: 28px; height: 28px; border-radius: 50%; background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800; color: #FFF; overflow: hidden; position: relative;" onclick="event.stopPropagation(); document.getElementById('profileImageInput').click();" title="Klik foto untuk ganti">
+                        <!-- WIDGET PROFIL HP (Sama Persis Kayak PC) -->
+    <div style="display: flex; align-items: center; gap: 12px; background: var(--bg-card); border: 1px solid var(--border-color); padding: 8px 16px; border-radius: var(--radius-md); box-shadow: 0 4px 10px rgba(0,0,0,0.02); transition: 0.2s;">
+        <!-- Lingkaran Foto (Bisa di-klik buat zoom) -->
+        <div id="hpAvatarContainer" style="width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: #FFF; box-shadow: 0 4px 10px rgba(0,0,0,0.1); flex-shrink: 0; position: relative; overflow: hidden; cursor: pointer;" title="Lihat Foto Profil">
             <span id="hpAvatarInitials">NP</span>
             <img id="hpAvatarImg" src="" style="display: none; width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0;">
         </div>
-        <!-- Teks Nama -->
-        <span id="hpUserName" style="font-size: 13px; font-weight: 800; color: var(--text-primary); white-space: nowrap; max-width: 90px; overflow: hidden; text-overflow: ellipsis;">Nama Pengguna</span>
+        
+        <!-- Info Nama & Status (Bisa di-klik buat edit) -->
+        <div style="display: flex; flex-direction: column; gap: 2px; cursor: pointer; overflow: hidden;" onclick="editProfile()" title="Ganti Nama & Status">
+            <span id="hpUserName" style="font-size: 13px; font-weight: 700; color: var(--text-primary); white-space: nowrap; max-width: 120px; overflow: hidden; text-overflow: ellipsis;">Nama Pengguna</span>
+            <span id="hpUserTier" style="font-size: 11px; color: var(--accent-secondary); font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">Klik buat isi profil</span>
+        </div>
     </div>
 
 <!-- 1. MARKET SESSION INDICATOR -->
@@ -1996,20 +2000,22 @@
         });
     }
 
-        function loadProfileData() {
+            function loadProfileData() {
         const savedName = localStorage.getItem('fs_user_name') || 'Nama Pengguna';
         const savedTier = localStorage.getItem('fs_user_tier') || 'Klik buat isi profil';
         const savedAvatar = localStorage.getItem('fs_user_avatar');
         
-        // 1. Update profil yang di sidebar (Buat tampilan PC/Laptop)
+        // 1. Update profil sidebar (PC)
         document.getElementById('displayUserName').innerText = savedName; 
         document.getElementById('displayUserTier').innerText = savedTier;
         
-        // 2. Update profil khusus yang di Topbar (Buat tampilan HP)
+        // 2. Update profil Topbar (HP)
         const hpUserName = document.getElementById('hpUserName');
+        const hpUserTier = document.getElementById('hpUserTier');
         if (hpUserName) hpUserName.innerText = savedName;
+        if (hpUserTier) hpUserTier.innerText = savedTier;
 
-        // 3. Bikin Singkatan Inisial Nama
+        // 3. Bikin Singkatan
         const words = savedName.trim().split(' ');
         const initials = words.length > 1 ? (words[0][0] + words[1][0]).toUpperCase() : words[0].substring(0,2).toUpperCase();
         
@@ -2028,6 +2034,7 @@
             else { hpImgEl.style.display = 'none'; hpInitEl.style.display = 'block'; }
         }
     }
+
 
     function handleProfileImage(event) {
         const file = event.target.files[0];
