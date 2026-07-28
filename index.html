@@ -695,6 +695,85 @@
             0% { background-position: 0 -100%; }
             100% { background-position: 0 100%; }
         }
+    /* ========================================================
+   ULTIMATE UPGRADE: CYBER-GRID, LIQUID GOLD & FROSTED GLASS
+   ======================================================== */
+
+/* 1. ANIMATED GRID LINE BACKGROUND (3D Terminal) */
+body::before {
+    content: ''; position: fixed; top: -50%; left: -50%; width: 200%; height: 200%;
+    background-image: 
+        linear-gradient(var(--glow-1) 1px, transparent 1px),
+        linear-gradient(90deg, var(--glow-1) 1px, transparent 1px);
+    background-size: 50px 50px;
+    transform: perspective(600px) rotateX(60deg) translateY(-100px) translateZ(-200px);
+    animation: gridMove 15s linear infinite; z-index: -3; pointer-events: none;
+    opacity: 0.5;
+}
+@keyframes gridMove { 
+    0% { transform: perspective(600px) rotateX(60deg) translateY(0) translateZ(-200px); } 
+    100% { transform: perspective(600px) rotateX(60deg) translateY(50px) translateZ(-200px); } 
+}
+
+/* 2. FROSTED GLASS EKSTREM */
+.card, .recap-card, .stat-card, .sidebar, .topbar {
+    background: rgba(255, 255, 255, 0.4) !important;
+    backdrop-filter: blur(28px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(28px) saturate(180%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+}
+[data-theme="dark"] .card, [data-theme="dark"] .recap-card, [data-theme="dark"] .stat-card, [data-theme="dark"] .sidebar, [data-theme="dark"] .topbar {
+    background: rgba(10, 10, 10, 0.35) !important;
+    border: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+
+/* 3. LIQUID GOLD PROGRESS BAR (Dream Board) */
+.progress-bar-fill {
+    background: linear-gradient(90deg, #B8860B, #FFD700, #FFF8DC, #FFD700, #B8860B) !important;
+    background-size: 300% 300% !important;
+    animation: liquidGoldFlow 3s ease-in-out infinite !important;
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.6), inset 0 0 10px rgba(255, 255, 255, 0.5) !important;
+}
+@keyframes liquidGoldFlow { 
+    0% { background-position: 0% 50%; } 
+    50% { background-position: 100% 50%; } 
+    100% { background-position: 0% 50%; } 
+}
+
+/* 4. CYBER-RIPPLE TRANSITION (Perpindahan Menu) */
+.content-tab { display: none; }
+.content-tab.active {
+    display: block;
+    animation: cyberRipple 0.6s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
+@keyframes cyberRipple {
+    0% { opacity: 0; filter: blur(12px) hue-rotate(45deg); transform: scale(0.97) translateY(20px); }
+    100% { opacity: 1; filter: blur(0) hue-rotate(0); transform: scale(1) translateY(0); }
+}
+
+/* 5. ROLLING ODOMETER (Blur Effect pas angka ganti) */
+.odometer-rolling {
+    animation: odometerRoll 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+}
+@keyframes odometerRoll {
+    0% { transform: translateY(15px); filter: blur(5px); opacity: 0; }
+    50% { filter: blur(2px); }
+    100% { transform: translateY(0); filter: blur(0); opacity: 1; }
+}
+
+/* 6. FLOATING SPARKLINES (Garis melayang) */
+.sparkline-float {
+    position: fixed; width: 200px; height: 2px;
+    background: linear-gradient(90deg, transparent, var(--accent-primary), transparent);
+    opacity: 0.6; z-index: -2; pointer-events: none;
+    animation: floatSpark 10s linear infinite;
+    box-shadow: 0 0 10px var(--accent-primary);
+}
+@keyframes floatSpark {
+    0% { transform: translateX(110vw) translateY(0) rotate(-20deg); }
+    100% { transform: translateX(-30vw) translateY(-150px) rotate(-20deg); }
+        }
+        
     </style>
     
     <div id="authScreen" style="position: fixed; inset: 0; background: var(--modal-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); z-index: 10000; display: flex; justify-content: center; align-items: center; transition: opacity 0.5s ease;">
@@ -3692,6 +3771,59 @@ window.switchTab = function(tabId, element) {
         setTimeout(renderPortfolioComparison, 200);
     }
 };
+// ========================================================
+// ULTIMATE UPGRADE JS: SPARKLINES, ODOMETER & AMBIENT GLOW
+// ========================================================
+
+// 1. INJECT FLOATING SPARKLINES
+function initFloatingSparklines() {
+    for (let i = 0; i < 6; i++) {
+        let spark = document.createElement('div');
+        spark.className = 'sparkline-float';
+        spark.style.top = (Math.random() * 80 + 10) + 'vh'; // Random posisi vertikal
+        spark.style.animationDelay = (Math.random() * 5) + 's';
+        spark.style.animationDuration = (8 + Math.random() * 6) + 's';
+        document.body.appendChild(spark);
+    }
+}
+// Jalankan sparklines saat web pertama kali dibuka
+setTimeout(initFloatingSparklines, 1000);
+
+// 2. MODIFIKASI MARKET SESSION BIAR AMBIENT GLOW IKUT BERUBAH
+const originalUpdateMarketSession = window.updateMarketSession;
+window.updateMarketSession = function() {
+    // Panggil fungsi aslinya dulu
+    if (originalUpdateMarketSession) originalUpdateMarketSession();
+    
+    // Ambil warna sesi dari titik lampu (sessionDot)
+    const dotElement = document.getElementById('sessionDot');
+    if (dotElement) {
+        const sessionColor = dotElement.style.backgroundColor;
+        
+        // Tembak warnanya ke ambient glow di latar belakang
+        document.documentElement.style.setProperty('--glow-1', sessionColor.replace('rgb', 'rgba').replace(')', ', 0.15)'));
+        document.documentElement.style.setProperty('--glow-2', sessionColor.replace('rgb', 'rgba').replace(')', ', 0.1)'));
+    }
+};
+
+// 3. MODIFIKASI ANIMASI ANGKA (ROLLING ODOMETER)
+const originalAnimateValue = window.animateValue;
+window.animateValue = function(obj, start, end, duration, symbol = '') {
+    if (!obj) return;
+    
+    // Tambahin class CSS buat efek blur muter
+    obj.classList.add('odometer-rolling');
+    
+    // Hapus class setelah animasi selesai biar bisa dipake lagi nanti
+    setTimeout(() => {
+        obj.classList.remove('odometer-rolling');
+    }, 800);
+
+    // Panggil fungsi hitung angka aslinya
+    if (originalAnimateValue) {
+        originalAnimateValue(obj, start, end, duration, symbol);
+    }
+};          
 </script>
 </body>
 </html>
