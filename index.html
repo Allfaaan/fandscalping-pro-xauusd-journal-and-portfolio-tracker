@@ -715,16 +715,26 @@ body::before {
     100% { transform: perspective(600px) rotateX(60deg) translateY(50px) translateZ(-200px); } 
 }
 
-/* 2. FROSTED GLASS EKSTREM */
-.card, .recap-card, .stat-card, .sidebar, .topbar {
+/* 2. FROSTED GLASS EKSTREM (FIXED) */
+.card:not(.glow), .recap-card, .stat-card:not(.glow), .sidebar, .topbar {
     background: rgba(255, 255, 255, 0.4) !important;
     backdrop-filter: blur(28px) saturate(180%) !important;
     -webkit-backdrop-filter: blur(28px) saturate(180%) !important;
     border: 1px solid rgba(255, 255, 255, 0.3) !important;
 }
-[data-theme="dark"] .card, [data-theme="dark"] .recap-card, [data-theme="dark"] .stat-card, [data-theme="dark"] .sidebar, [data-theme="dark"] .topbar {
+
+[data-theme="dark"] .card:not(.glow), [data-theme="dark"] .recap-card, [data-theme="dark"] .stat-card:not(.glow), [data-theme="dark"] .sidebar, [data-theme="dark"] .topbar {
     background: rgba(10, 10, 10, 0.35) !important;
     border: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+
+/* Kunci paksa gradient biru buat card Current Equity biar nggak kalah */
+.stat-card.glow {
+    background: linear-gradient(135deg, #0EA5E9 0%, #38BDF8 100%) !important;
+}
+
+[data-theme="dark"] .stat-card.glow {
+    background: linear-gradient(135deg, #1E293B 0%, #0F172A 100%) !important;
 }
 
 /* 3. LIQUID GOLD PROGRESS BAR (Dream Board) */
